@@ -76,6 +76,17 @@ switch($action) {
     case 'export_my_tasks':
         include 'controllers/my_tasks_export.php';
         break;
+    
+    case 'task_status_management':
+        include 'views/task_status_management.php';
+        break;
+    
+    case 'get_status':
+    case 'create_status':
+    case 'update_status':
+    case 'delete_status':
+        include 'controllers/task_status_controller.php';
+        break;
     default:
         include 'views/dashboard_enhanced.php';
 }

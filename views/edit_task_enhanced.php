@@ -1,6 +1,7 @@
 <?php
 require_once 'models/TaskEnhanced.php';
 require_once 'models/User.php';
+require_once 'models/TaskStatus.php';
 
 if (!isset($_GET['id'])) {
     header('Location: index.php');
@@ -18,6 +19,9 @@ if (!$taskData) {
 $user = new User($db);
 $users = $user->read();
 $attachments = $task->getAttachments($_GET['id']);
+
+$statusModel = new TaskStatus($db);
+$allStatuses = $statusModel->getAllStatuses();
 
 $page_title = "Edit Task";
 include 'includes/header.php';
@@ -79,31 +83,18 @@ include 'includes/header.php';
                         <i class="fas fa-cogs"></i> Status & Priority
                     </div>
                     
-                    <div class="form-row-modern">
+                    <div class="">
                         <div class="form-group-modern">
                             <label for="status" class="form-label-modern">
                                 <i class="fas fa-flag"></i> Status
                             </label>
                             <div class="status-selector">
-                                <input type="radio" id="status_pending" name="status" value="pending" <?php echo $taskData['status'] == 'pending' ? 'checked' : ''; ?>>
-                                <label for="status_pending" class="status-option pending">
-                                    <i class="fas fa-clock"></i> Pending
+                                <?php foreach ($allStatuses as $status): ?>
+                                <input type="radio" id="status_<?php echo $status['id']; ?>" name="status_id" value="<?php echo $status['id']; ?>" <?php echo $taskData['status_id'] == $status['id'] ? 'checked' : ''; ?>>
+                                <label for="status_<?php echo $status['id']; ?>" class="status-option <?php echo $status['group_status']; ?>" style="border-color: <?php echo $status['color']; ?>">
+                                    <i class="fas fa-circle" style="color: <?php echo $status['color']; ?>"></i> <?php echo htmlspecialchars($status['name']); ?>
                                 </label>
-                                
-                                <input type="radio" id="status_progress" name="status" value="in_progress" <?php echo $taskData['status'] == 'in_progress' ? 'checked' : ''; ?>>
-                                <label for="status_progress" class="status-option progress">
-                                    <i class="fas fa-spinner"></i> In Progress
-                                </label>
-                                
-                                <input type="radio" id="status_completed" name="status" value="completed" <?php echo $taskData['status'] == 'completed' ? 'checked' : ''; ?>>
-                                <label for="status_completed" class="status-option completed">
-                                    <i class="fas fa-check-circle"></i> Completed
-                                </label>
-                                
-                                <input type="radio" id="status_cancelled" name="status" value="cancelled" <?php echo $taskData['status'] == 'cancelled' ? 'checked' : ''; ?>>
-                                <label for="status_cancelled" class="status-option cancelled">
-                                    <i class="fas fa-times-circle"></i> Cancelled
-                                </label>
+                                <?php endforeach; ?>
                             </div>
                         </div>
                         

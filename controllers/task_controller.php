@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($action == 'create') {
         $task->title = $_POST['title'];
         $task->description = $_POST['description'] ?? '';
-        $task->status = $_POST['status'] ?? 'pending';
+        $task->status_id = $_POST['status_id'] ?? 1;
         $task->priority = $_POST['priority'] ?? 'medium';
         $task->assigned_to = !empty($_POST['assigned_to']) ? $_POST['assigned_to'] : null;
         $task->created_by = $_SESSION['user_id'];
@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $task->id = $_POST['task_id'];
         $task->title = $_POST['title'];
         $task->description = $_POST['description'];
-        $task->status = $_POST['status'];
+        $task->status_id = $_POST['status_id'];
         $task->priority = $_POST['priority'];
         $task->assigned_to = !empty($_POST['assigned_to']) ? $_POST['assigned_to'] : null;
         $task->due_date = $_POST['due_date'] ?: null;

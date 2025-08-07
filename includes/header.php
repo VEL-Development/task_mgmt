@@ -25,11 +25,11 @@
             <div class="nav-links">
                 <a href="?" class="nav-link"><i class="fas fa-chart-pie"></i> Dashboard</a>
                 <a href="?action=tasks_list" class="nav-link"><i class="fas fa-list"></i> Tasks</a>
-                <a href="?action=my_tasks" class="nav-link"><i class="fas fa-user-tasks"></i> My Tasks</a>
                 <a href="?action=create_task" class="nav-link"><i class="fas fa-plus"></i> New Task</a>
                 <a href="?action=reports" class="nav-link"><i class="fas fa-chart-bar"></i> Reports</a>
                 <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
                 <a href="?action=user_management" class="nav-link"><i class="fas fa-users"></i> Users</a>
+
                 <?php endif; ?>
                 <div class="nav-user" onclick="toggleUserMenu()">
                     <div class="user-avatar"><?php echo strtoupper(substr($_SESSION['full_name'], 0, 1)); ?></div>
@@ -39,8 +39,14 @@
                         <a href="?action=profile" class="dropdown-item">
                             <i class="fas fa-user"></i> Profile
                         </a>
+                        <a href="?action=my_tasks" class="dropdown-item">
+                            <i class="fas fa-calendar-day"></i> Today's Tasks
+                        </a>
                         <a href="?action=settings" class="dropdown-item">
                             <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <a href="?action=task_status_management" class="dropdown-item">
+                            <i class="fas fa-tags"></i> Task Status
                         </a>
                         <div class="dropdown-divider"></div>
                         <a href="#" onclick="confirmLogout()" class="dropdown-item">

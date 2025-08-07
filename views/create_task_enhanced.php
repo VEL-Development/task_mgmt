@@ -1,8 +1,15 @@
 <?php
 require_once 'models/User.php';
+require_once 'models/TaskStatus.php';
 
 $user = new User($db);
 $users = $user->read();
+
+$statusModel = new TaskStatus($db);
+$allStatuses = $statusModel->getAllStatuses();
+$createStatuses = array_filter($allStatuses, function($status) {
+    return in_array($status['group_status'], ['pending', 'in_progress', 'completed']);
+});
 
 $page_title = "Create New Task";
 include 'includes/header.php';
@@ -57,31 +64,18 @@ include 'includes/header.php';
                         <i class="fas fa-cogs"></i> Status & Priority
                     </div>
                     
-                    <div class="form-row-modern">
+                    <div class="">
                         <div class="form-group-modern">
                             <label for="status" class="form-label-modern">
                                 <i class="fas fa-flag"></i> Status
                             </label>
                             <div class="status-selector">
-                                <input type="radio" id="status_pending" name="status" value="pending" checked>
-                                <label for="status_pending" class="status-option pending">
-                                    <i class="fas fa-clock"></i> Pending
+                                <?php foreach ($createStatuses as $index => $status): ?>
+                                <input type="radio" id="status_<?php echo $status['id']; ?>" name="status_id" value="<?php echo $status['id']; ?>" <?php echo $index === 0 ? 'checked' : ''; ?>>
+                                <label for="status_<?php echo $status['id']; ?>" class="status-option <?php echo $status['group_status']; ?>" style="border-color: <?php echo $status['color']; ?>">
+                                    <i class="fas fa-circle" style="color: <?php echo $status['color']; ?>"></i> <?php echo htmlspecialchars($status['name']); ?>
                                 </label>
-                                
-                                <input type="radio" id="status_progress" name="status" value="in_progress">
-                                <label for="status_progress" class="status-option progress">
-                                    <i class="fas fa-spinner"></i> In Progress
-                                </label>
-                                
-                                <input type="radio" id="status_completed" name="status" value="completed">
-                                <label for="status_completed" class="status-option completed">
-                                    <i class="fas fa-check-circle"></i> Completed
-                                </label>
-                                
-                                <input type="radio" id="status_cancelled" name="status" value="cancelled">
-                                <label for="status_cancelled" class="status-option cancelled">
-                                    <i class="fas fa-times-circle"></i> Cancelled
-                                </label>
+                                <?php endforeach; ?>
                             </div>
                         </div>
                         
