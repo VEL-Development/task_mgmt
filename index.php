@@ -47,6 +47,9 @@ switch($action) {
     case 'tasks_list':
         include 'views/tasks_list.php';
         break;
+    case 'user_dashboard':
+        include 'views/user_dashboard.php';
+        break;
     case 'user_management':
         include 'views/user_management.php';
         break;

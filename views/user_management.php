@@ -205,7 +205,7 @@ $users = $user->getAllUsers();
                 </div>
                 
                 <div class="user-actions">
-                    <button class="btn-action-primary" onclick="viewUserDashboard(<?= $u['id'] ?>)">
+                    <button class="btn-action-primary" onclick="window.open('index.php?action=user_dashboard&user_id=<?= $u['id'] ?>', '_blank')">
                         <i class="fas fa-chart-pie"></i>
                         <span>View Dashboard</span>
                     </button>

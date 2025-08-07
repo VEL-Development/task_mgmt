@@ -10,6 +10,7 @@
     <link href="assets/css/modern.css" rel="stylesheet">
     <link href="assets/css/user_management.css" rel="stylesheet">
     <link href="assets/css/user_dashboard.css" rel="stylesheet">
+    <link href="assets/css/user_dashboard_page.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
