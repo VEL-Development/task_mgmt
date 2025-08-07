@@ -265,6 +265,7 @@ body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f8
 .priority-item.urgent { background: #fecaca; color: #dc2626; }
 .priority-item.high { background: #fed7aa; color: #c2410c; }
 .priority-item.medium { background: #dbeafe; color: #1e40af; }
+.priority-item.low { background: #f3f4f6; color: #374151; }
 .performance-card {
     background: var(--surface);
     border-radius: 16px;

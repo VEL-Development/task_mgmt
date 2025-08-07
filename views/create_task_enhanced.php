@@ -260,17 +260,23 @@ document.addEventListener('DOMContentLoaded', function() {
         if (response.redirected) {
             const url = new URL(response.url);
             if (url.searchParams.get('success') === 'created') {
+                const taskId = url.searchParams.get('id');
                 Swal.fire({
                     title: 'Task Created!',
                     html: '<div style="text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 3rem; margin-bottom: 1rem;"></i><br><strong>Your task has been created successfully</strong><br><small style="color: #6b7280;">You can now view it in your dashboard</small></div>',
                     icon: false,
-                    confirmButtonText: '<i class="fas fa-eye"></i> View Dashboard',
+                    confirmButtonText: '<i class="fas fa-eye"></i> View Task',
                     showCancelButton: true,
                     cancelButtonText: '<i class="fas fa-plus"></i> Create Another',
+                    showDenyButton: true,
+                    denyButtonText: '<i class="fas fa-chart-pie"></i> Dashboard',
                     confirmButtonColor: '#6366f1',
-                    cancelButtonColor: '#10b981'
+                    cancelButtonColor: '#10b981',
+                    denyButtonColor: '#64748b'
                 }).then((result) => {
-                    if (result.isConfirmed) {
+                    if (result.isConfirmed && taskId) {
+                        window.location.href = `index.php?action=task_details&id=${taskId}`;
+                    } else if (result.isDenied) {
                         window.location.href = 'index.php';
                     } else if (result.dismiss === Swal.DismissReason.cancel) {
                         window.location.reload();
@@ -282,17 +288,26 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             return response.text().then(data => {
                 if (data.includes('success=created')) {
+                    // Extract task ID from response data
+                    const taskIdMatch = data.match(/id=(\d+)/);
+                    const taskId = taskIdMatch ? taskIdMatch[1] : null;
+                    
                     Swal.fire({
                         title: 'Task Created!',
                         html: '<div style="text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 3rem; margin-bottom: 1rem;"></i><br><strong>Your task has been created successfully</strong><br><small style="color: #6b7280;">You can now view it in your dashboard</small></div>',
                         icon: false,
-                        confirmButtonText: '<i class="fas fa-eye"></i> View Dashboard',
+                        confirmButtonText: '<i class="fas fa-eye"></i> View Task',
                         showCancelButton: true,
                         cancelButtonText: '<i class="fas fa-plus"></i> Create Another',
+                        showDenyButton: true,
+                        denyButtonText: '<i class="fas fa-chart-pie"></i> Dashboard',
                         confirmButtonColor: '#6366f1',
-                        cancelButtonColor: '#10b981'
+                        cancelButtonColor: '#10b981',
+                        denyButtonColor: '#64748b'
                     }).then((result) => {
-                        if (result.isConfirmed) {
+                        if (result.isConfirmed && taskId) {
+                            window.location.href = `index.php?action=task_details&id=${taskId}`;
+                        } else if (result.isDenied) {
                             window.location.href = 'index.php';
                         } else if (result.dismiss === Swal.DismissReason.cancel) {
                             window.location.reload();

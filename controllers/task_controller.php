@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
             }
             
-            header("Location: index.php?success=created");
+            header("Location: index.php?success=created&id=$task_id");
             exit;
         } else {
             error_log("Task creation failed for user: " . $_SESSION['user_id']);

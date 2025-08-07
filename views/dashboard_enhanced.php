@@ -102,6 +102,7 @@ include 'includes/header.php';
             <div class="priority-item urgent">Urgent: <?php echo $stats['priority_urgent']; ?></div>
             <div class="priority-item high">High: <?php echo $stats['priority_high']; ?></div>
             <div class="priority-item medium">Medium: <?php echo $stats['priority_medium']; ?></div>
+            <div class="priority-item low">Low: <?php echo $stats['priority_low']; ?></div>
         </div>
     </div>
     
