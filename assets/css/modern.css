@@ -22,7 +22,7 @@ body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f8
 .nav-links { display: flex; gap: 2rem; align-items: center; }
 .nav-link { color: var(--text-muted); text-decoration: none; font-weight: 500; padding: 0.5rem 1rem; border-radius: var(--radius); transition: all 0.2s; }
 .nav-link:hover { color: var(--primary); background: var(--surface-hover); }
-.nav-user { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1rem; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); cursor: pointer; transition: all 0.2s; }
+.nav-user { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1rem; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); cursor: pointer; transition: all 0.2s; position: relative; }
 .nav-user:hover { box-shadow: var(--shadow); }
 .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; }
 .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
@@ -68,14 +68,14 @@ body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f8
 .user-dropdown {
     display: none;
     position: absolute;
-    top: 70px;
-    right: 2rem;
+    top: 100%;
+    right: 0;
     background: white;
     border-radius: var(--radius);
     box-shadow: var(--shadow-lg);
     border: 1px solid var(--border);
     min-width: 200px;
-    z-index: 1001;
+    z-index: 9999;
     opacity: 0;
     transform: translateY(-10px);
     transition: all 0.2s ease;

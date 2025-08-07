@@ -24,7 +24,7 @@ if (isset($_POST['action']) && $_POST['action'] == 'login') {
     }
 } elseif (isset($_GET['action']) && $_GET['action'] == 'logout') {
     session_destroy();
-    header("Location: ../index.php?action=login");
+    header("Location: ../index.php");
     exit;
 }
 ?>

@@ -480,14 +480,7 @@ function toggleUserStatus(id, status) {
     });
 }
 
-function toggleUserMenu(userId) {
-    const menu = document.getElementById(`userMenu${userId}`);
-    // Close all other menus
-    document.querySelectorAll('.user-dropdown').forEach(m => {
-        if (m.id !== `userMenu${userId}`) m.classList.remove('show');
-    });
-    menu.classList.toggle('show');
-}
+
 
 
 
@@ -605,12 +598,7 @@ window.onclick = function(event) {
         document.body.style.overflow = 'auto';
     }
     
-    // Close user menus when clicking outside
-    if (!event.target.closest('.user-menu')) {
-        document.querySelectorAll('.user-dropdown').forEach(menu => {
-            menu.classList.remove('show');
-        });
-    }
+
 }
 
 // Add keyboard navigation
@@ -622,10 +610,7 @@ document.addEventListener('keydown', function(e) {
         });
         document.body.style.overflow = 'auto';
         
-        // Close all dropdowns
-        document.querySelectorAll('.user-dropdown').forEach(menu => {
-            menu.classList.remove('show');
-        });
+
     }
 });
 

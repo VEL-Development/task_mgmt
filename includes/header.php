@@ -34,22 +34,22 @@
                     <div class="user-avatar"><?php echo strtoupper(substr($_SESSION['full_name'], 0, 1)); ?></div>
                     <span><?php echo $_SESSION['full_name']; ?></span>
                     <i class="fas fa-chevron-down"></i>
+                    <div id="userMenu" class="user-dropdown">
+                        <a href="?action=profile" class="dropdown-item">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                        <a href="?action=settings" class="dropdown-item">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" onclick="confirmLogout()" class="dropdown-item">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </nav>
-    <div id="userMenu" class="user-dropdown">
-        <a href="?action=profile" class="dropdown-item">
-            <i class="fas fa-user"></i> Profile
-        </a>
-        <a href="?action=settings" class="dropdown-item">
-            <i class="fas fa-cog"></i> Settings
-        </a>
-        <div class="dropdown-divider"></div>
-        <a href="#" onclick="confirmLogout()" class="dropdown-item">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
-    </div>
     <script>
         function toggleUserMenu() {
             const menu = document.getElementById('userMenu');
