@@ -73,14 +73,7 @@ $users = $user->getAllUsers();
                         <option value="inactive">Inactive</option>
                     </select>
                 </div>
-                <div class="view-toggle">
-                    <button class="toggle-btn active" onclick="switchView('grid')" id="gridView">
-                        <i class="fas fa-th-large"></i>
-                    </button>
-                    <button class="toggle-btn" onclick="switchView('list')" id="listView">
-                        <i class="fas fa-list"></i>
-                    </button>
-                </div>
+
             </div>
         </div>
         
@@ -115,27 +108,7 @@ $users = $user->getAllUsers();
                         </div>
                     </div>
                     
-                    <div class="user-menu">
-                        <button class="menu-toggle" onclick="toggleUserMenu(<?= $u['id'] ?>)">
-                            <i class="fas fa-ellipsis-v"></i>
-                        </button>
-                        <div class="user-dropdown" id="userMenu<?= $u['id'] ?>">
-                            <a href="index.php?action=user_dashboard&user_id=<?= $u['id'] ?>" class="dropdown-item" target="_blank">
-                                <i class="fas fa-chart-pie"></i> View Dashboard
-                            </a>
-                            <a href="#" onclick="editUser(<?= $u['id'] ?>)" class="dropdown-item">
-                                <i class="fas fa-edit"></i> Edit User
-                            </a>
-                            <?php if ($u['id'] != $_SESSION['user_id']): ?>
-                            <div class="dropdown-divider"></div>
-                            <a href="#" onclick="toggleUserStatus(<?= $u['id'] ?>, '<?= ($u['status'] ?? 'active') === 'active' ? 'inactive' : 'active' ?>')" 
-                               class="dropdown-item <?= ($u['status'] ?? 'active') === 'active' ? 'danger' : 'success' ?>">
-                                <i class="fas fa-<?= ($u['status'] ?? 'active') === 'active' ? 'user-slash' : 'user-check' ?>"></i> 
-                                <?= ($u['status'] ?? 'active') === 'active' ? 'Deactivate' : 'Activate' ?>
-                            </a>
-                            <?php endif; ?>
-                        </div>
-                    </div>
+
                 </div>
                 
                 <div class="user-performance">
@@ -221,94 +194,19 @@ $users = $user->getAllUsers();
                         <i class="fas fa-edit"></i>
                         <span>Edit</span>
                     </button>
-                </div>
-            </div>
-            <?php endforeach; ?>
-        </div>
-        
-        <div class="users-list" id="usersList" style="display: none;">
-            <?php foreach ($users as $u): 
-                $userTasks = $task->getUserTaskStats($u['id']);
-                $completionRate = $userTasks['total'] > 0 ? round(($userTasks['completed'] / $userTasks['total']) * 100) : 0;
-            ?>
-            <div class="user-list-item <?= ($u['status'] ?? 'active') === 'inactive' ? 'inactive' : '' ?>" 
-                 data-role="<?= $u['role'] ?>" data-status="<?= $u['status'] ?? 'active' ?>">
-                
-                <div class="list-item-header">
-                    <div class="user-avatar-list role-<?= $u['role'] ?>">
-                        <?= strtoupper(substr($u['full_name'], 0, 2)) ?>
-                    </div>
-                    <div class="user-basic-info">
-                        <h3 class="user-name"><?= htmlspecialchars($u['full_name']) ?></h3>
-                        <p class="user-username">@<?= htmlspecialchars($u['username']) ?></p>
-                        <p class="user-email"><?= htmlspecialchars($u['email']) ?></p>
-                    </div>
-                    <div class="user-badges-list">
-                        <span class="role-badge role-<?= $u['role'] ?>">
-                            <i class="fas fa-<?= $u['role'] === 'admin' ? 'crown' : ($u['role'] === 'team_lead' ? 'star' : 'user') ?>"></i>
-                            <?= ucfirst(str_replace('_', ' ', $u['role'])) ?>
-                        </span>
-                        <span class="status-badge status-<?= ($u['status'] ?? 'active') === 'active' ? 'active' : 'inactive' ?>">
-                            <i class="fas fa-<?= ($u['status'] ?? 'active') === 'active' ? 'check-circle' : 'times-circle' ?>"></i>
-                            <?= ($u['status'] ?? 'active') === 'active' ? 'Active' : 'Inactive' ?>
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="list-item-stats">
-                    <div class="stat-mini total">
-                        <span class="stat-number"><?= $userTasks['total'] ?? 0 ?></span>
-                        <span class="stat-label">Total</span>
-                    </div>
-                    <div class="stat-mini completed">
-                        <span class="stat-number"><?= $userTasks['completed'] ?? 0 ?></span>
-                        <span class="stat-label">Done</span>
-                    </div>
-                    <div class="stat-mini progress">
-                        <span class="stat-number"><?= $userTasks['in_progress'] ?? 0 ?></span>
-                        <span class="stat-label">Active</span>
-                    </div>
-                    <div class="stat-mini pending">
-                        <span class="stat-number"><?= isset($userTasks['pending']) ? $userTasks['pending'] : 0 ?></span>
-                        <span class="stat-label">Pending</span>
-                    </div>
-                    <div class="completion-indicator">
-                        <div class="completion-bar">
-                            <div class="completion-fill" style="width: <?= $completionRate ?>%"></div>
-                        </div>
-                        <span class="completion-text"><?= $completionRate ?>%</span>
-                    </div>
-                </div>
-                
-                <div class="list-item-meta">
-                    <div class="meta-info">
-                        <span><i class="fas fa-calendar-plus"></i> Joined <?= date('M j, Y', strtotime($u['created_at'])) ?></span>
-                        <?php if (($u['status'] ?? 'active') === 'active'): ?>
-                        <span class="online-status"><i class="fas fa-circle"></i> Online</span>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                
-                <div class="list-item-actions">
-                    <button class="btn-list-action primary" onclick="window.open('index.php?action=user_dashboard&user_id=<?= $u['id'] ?>', '_blank')">
-                        <i class="fas fa-chart-pie"></i>
-                        Dashboard
-                    </button>
-                    <button class="btn-list-action secondary" onclick="editUser(<?= $u['id'] ?>)">
-                        <i class="fas fa-edit"></i>
-                        Edit
-                    </button>
                     <?php if ($u['id'] != $_SESSION['user_id']): ?>
-                    <button class="btn-list-action <?= ($u['status'] ?? 'active') === 'active' ? 'danger' : 'success' ?>" 
+                    <button class="btn-action-<?= ($u['status'] ?? 'active') === 'active' ? 'danger' : 'success' ?>" 
                             onclick="toggleUserStatus(<?= $u['id'] ?>, '<?= ($u['status'] ?? 'active') === 'active' ? 'inactive' : 'active' ?>')">
                         <i class="fas fa-<?= ($u['status'] ?? 'active') === 'active' ? 'user-slash' : 'user-check' ?>"></i>
-                        <?= ($u['status'] ?? 'active') === 'active' ? 'Deactivate' : 'Activate' ?>
+                        <span><?= ($u['status'] ?? 'active') === 'active' ? 'Deactivate' : 'Activate' ?></span>
                     </button>
                     <?php endif; ?>
                 </div>
             </div>
             <?php endforeach; ?>
         </div>
+        
+
         </div>
     </div>
 </div>
@@ -584,41 +482,12 @@ function toggleUserMenu(userId) {
     menu.classList.toggle('show');
 }
 
-function switchView(viewType) {
-    const gridView = document.getElementById('usersGrid');
-    const listView = document.getElementById('usersList');
-    const gridBtn = document.getElementById('gridView');
-    const listBtn = document.getElementById('listView');
-    
-    if (viewType === 'grid') {
-        gridView.style.display = 'grid';
-        listView.style.display = 'none';
-        gridBtn.classList.add('active');
-        listBtn.classList.remove('active');
-    } else {
-        gridView.style.display = 'none';
-        listView.style.display = 'block';
-        listBtn.classList.add('active');
-        gridBtn.classList.remove('active');
-        
-        // Animate list items one by one
-        const listItems = document.querySelectorAll('.user-list-item');
-        listItems.forEach((item, index) => {
-            item.style.opacity = '0';
-            item.style.transform = 'translateX(-20px)';
-            setTimeout(() => {
-                item.style.transition = 'all 0.3s ease';
-                item.style.opacity = '1';
-                item.style.transform = 'translateX(0)';
-            }, index * 150);
-        });
-    }
-}
+
 
 function filterUsers() {
     const roleFilter = document.getElementById('roleFilter').value;
     const statusFilter = document.getElementById('statusFilter').value;
-    const userCards = document.querySelectorAll('.user-card, .user-list-item');
+    const userCards = document.querySelectorAll('.user-card');
     
     userCards.forEach(card => {
         const role = card.dataset.role;
@@ -628,7 +497,7 @@ function filterUsers() {
         const statusMatch = !statusFilter || status === statusFilter;
         
         if (roleMatch && statusMatch) {
-            card.style.display = card.classList.contains('user-card') ? 'block' : 'flex';
+            card.style.display = 'block';
             card.style.animation = 'fadeIn 0.3s ease';
         } else {
             card.style.display = 'none';
