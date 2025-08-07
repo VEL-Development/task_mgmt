@@ -68,6 +68,14 @@ switch($action) {
     case 'settings_update':
         include 'controllers/settings_controller.php';
         break;
+    
+    case 'my_tasks':
+        include 'views/my_tasks.php';
+        break;
+    
+    case 'export_my_tasks':
+        include 'controllers/my_tasks_export.php';
+        break;
     default:
         include 'views/dashboard_enhanced.php';
 }
