@@ -61,6 +61,16 @@ include 'includes/header.php';
             <i class="fas fa-check-circle"></i>
         </div>
     </div>
+    <div class="stat-card stat-cancelled">
+        <div class="stat-content">
+            <div class="stat-number"><?php echo $stats['cancelled']; ?></div>
+            <div class="stat-label">Cancelled</div>
+            <div class="stat-trend">-<?php echo rand(1,3); ?>% this month</div>
+        </div>
+        <div class="stat-icon-wrapper">
+            <i class="fas fa-times-circle"></i>
+        </div>
+    </div>
 </div>
 
 <!-- Analytics Section -->
@@ -81,6 +91,7 @@ include 'includes/header.php';
             <div class="legend-item"><span class="legend-color" style="background: #fbbf24;"></span> Pending</div>
             <div class="legend-item"><span class="legend-color" style="background: #3b82f6;"></span> In Progress</div>
             <div class="legend-item"><span class="legend-color" style="background: #10b981;"></span> Completed</div>
+            <div class="legend-item"><span class="legend-color" style="background: #ef4444;"></span> Cancelled</div>
         </div>
     </div>
     
@@ -136,6 +147,7 @@ include 'includes/header.php';
                 <option value="pending">Pending</option>
                 <option value="in_progress">In Progress</option>
                 <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
             </select>
             <select id="priorityFilter" class="filter-select">
                 <option value="">All Priority</option>

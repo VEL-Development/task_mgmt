@@ -149,6 +149,13 @@ $users = $user->getAllUsers();
                                 <div class="stat-label">Pending</div>
                             </div>
                         </div>
+                        <div class="stat-item cancelled">
+                            <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
+                            <div class="stat-data">
+                                <div class="stat-number"><?= isset($userTasks['cancelled']) ? $userTasks['cancelled'] : 0 ?></div>
+                                <div class="stat-label">Cancelled</div>
+                            </div>
+                        </div>
                     </div>
                     
                     <?php if ($userTasks['total'] > 0): ?>

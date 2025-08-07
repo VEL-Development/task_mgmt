@@ -115,6 +115,10 @@ include 'includes/header.php';
                 <span class="insight-dot completed"></span>
                 <span>Completed: <?php echo $stats['completed']; ?></span>
             </div>
+            <div class="insight-item">
+                <span class="insight-dot cancelled"></span>
+                <span>Cancelled: <?php echo $stats['cancelled']; ?></span>
+            </div>
         </div>
     </div>
     
@@ -178,6 +182,16 @@ include 'includes/header.php';
                         <span class="metric-label">Done</span>
                         <div class="metric-progress">
                             <div class="progress-fill completed" style="width: <?php echo $stats['total'] > 0 ? ($stats['completed'] / $stats['total']) * 100 : 0; ?>%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-icon"><i class="fas fa-times-circle"></i></div>
+                    <div class="metric-data">
+                        <span class="metric-value"><?php echo $stats['cancelled']; ?></span>
+                        <span class="metric-label">Cancelled</span>
+                        <div class="metric-progress">
+                            <div class="progress-fill cancelled" style="width: <?php echo $stats['total'] > 0 ? ($stats['cancelled'] / $stats['total']) * 100 : 0; ?>%;"></div>
                         </div>
                     </div>
                 </div>

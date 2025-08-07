@@ -114,10 +114,35 @@ body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f8
 
 /* Enhanced Dashboard Cards */
 .dashboard-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    display: flex;
     gap: 1.5rem;
     margin-bottom: 2rem;
+    overflow: hidden;
+    padding: 1rem 0;
+    position: relative;
+    mask: linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%);
+    -webkit-mask: linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%);
+}
+
+.dashboard-stats .stat-card {
+    min-width: 280px;
+    flex-shrink: 0;
+    animation: smoothScroll 25s ease-in-out infinite;
+    transition: transform 0.3s ease;
+}
+
+.dashboard-stats .stat-card:hover {
+    animation-play-state: paused;
+    transform: scale(1.02) translateY(-5px);
+    z-index: 10;
+}
+
+@keyframes smoothScroll {
+    0% { transform: translateX(calc(-295.5px * 2.5)); }
+    25% { transform: translateX(calc(-295.5px * 1.25)); }
+    50% { transform: translateX(0); }
+    75% { transform: translateX(calc(295.5px * 1.25)); }
+    100% { transform: translateX(calc(-295.5px * 2.5)); }
 }
 .stat-card {
     background: var(--surface);
@@ -174,6 +199,7 @@ body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f8
 .stat-pending .stat-icon-wrapper { background: linear-gradient(135deg, #f59e0b, #f97316); }
 .stat-progress .stat-icon-wrapper { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
 .stat-completed .stat-icon-wrapper { background: linear-gradient(135deg, #10b981, #059669); }
+.stat-cancelled .stat-icon-wrapper { background: linear-gradient(135deg, #ef4444, #dc2626); }
 
 /* Enhanced Analytics Section */
 .analytics-grid {
@@ -1283,6 +1309,7 @@ body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f8
 .insight-dot.pending { background: #fbbf24; }
 .insight-dot.progress { background: #3b82f6; }
 .insight-dot.completed { background: #10b981; }
+.insight-dot.cancelled { background: #ef4444; }
 .priority-breakdown {
     padding: 1rem 1.5rem;
     border-top: 1px solid var(--border);
@@ -1331,60 +1358,129 @@ body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f8
     gap: 0.5rem;
 }
 .insight-content {
-    padding: 1rem 1.5rem 1.5rem;
+    padding: 1.5rem;
 }
 .metric-row {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
+    height: 160px;
+    padding: 0.5rem;
 }
 .metric-item {
     display: flex;
     align-items: center;
     gap: 1rem;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 80px;
+    position: relative;
+    overflow: hidden;
+}
+
+.metric-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.metric-item:hover::before {
+    left: 100%;
+}
+
+.metric-item:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: #c7d2fe;
 }
 .metric-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--surface-hover);
-    color: var(--primary);
+    background: linear-gradient(135deg, var(--primary), #8b5cf6);
+    color: white;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    transition: all 0.3s ease;
+}
+
+.metric-item:hover .metric-icon {
+    transform: rotate(5deg) scale(1.1);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
 }
 .metric-data {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 40px;
 }
 .metric-value {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 700;
     color: var(--text);
     display: block;
+    line-height: 1.1;
+    margin-bottom: 0.25rem;
 }
 .metric-label {
     font-size: 0.85rem;
     color: var(--text-muted);
     display: block;
-    margin-bottom: 0.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 .metric-progress {
-    height: 4px;
-    background: var(--border);
-    border-radius: 2px;
+    height: 6px;
+    background: rgba(226, 232, 240, 0.5);
+    border-radius: 3px;
     overflow: hidden;
+    margin-top: 0.5rem;
+    position: relative;
+}
+
+.metric-progress::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
 }
 .progress-fill {
     height: 100%;
     transition: width 0.3s;
 }
-.progress-fill.pending { background: #fbbf24; }
-.progress-fill.active { background: #3b82f6; }
-.progress-fill.completed { background: #10b981; }
+.progress-fill.pending { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+.progress-fill.active { background: linear-gradient(90deg, #3b82f6, #2563eb); }
+.progress-fill.completed { background: linear-gradient(90deg, #10b981, #059669); }
+.progress-fill.cancelled { background: linear-gradient(90deg, #ef4444, #dc2626); }
 .priority-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
+    height: 160px;
+    align-content: start;
 }
 .priority-cell {
     padding: 1rem;
@@ -2149,6 +2245,10 @@ body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f8
 
 .card-icon.status-completed {
     background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.card-icon.status-cancelled {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
 }
 
 .card-icon.status-cancelled {

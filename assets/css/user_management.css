@@ -447,7 +447,7 @@
 
 .task-stats-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
     margin-bottom: 1.5rem;
 }
@@ -483,6 +483,7 @@
 .stat-item.completed .stat-icon { background: #10b981; }
 .stat-item.progress .stat-icon { background: #f59e0b; }
 .stat-item.pending .stat-icon { background: #6b7280; }
+.stat-item.cancelled .stat-icon { background: #ef4444; }
 
 .stat-data {
     flex: 1;

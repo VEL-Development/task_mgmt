@@ -125,6 +125,20 @@ $completionRate = $userTasks['total'] > 0 ? round(($userTasks['completed'] / $us
                     <span>-5%</span>
                 </div>
             </div>
+            
+            <div class="metric-card cancelled">
+                <div class="metric-icon">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="metric-data">
+                    <div class="metric-number"><?= $userTasks['cancelled'] ?? 0 ?></div>
+                    <div class="metric-label">Cancelled</div>
+                </div>
+                <div class="metric-trend neutral">
+                    <i class="fas fa-minus"></i>
+                    <span>0%</span>
+                </div>
+            </div>
         </div>
 
         <div class="dashboard-grid">
@@ -137,6 +151,7 @@ $completionRate = $userTasks['total'] > 0 ? round(($userTasks['completed'] / $us
                             <option value="pending">Pending</option>
                             <option value="in_progress">In Progress</option>
                             <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
                         </select>
                     </div>
                 </div>
