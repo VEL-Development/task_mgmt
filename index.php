@@ -56,6 +56,18 @@ switch($action) {
     case 'export_csv':
         include 'controllers/export_controller.php';
         break;
+    case 'profile':
+        include 'views/profile.php';
+        break;
+    case 'settings':
+        include 'views/settings.php';
+        break;
+    case 'profile_update':
+        include 'controllers/profile_controller.php';
+        break;
+    case 'settings_update':
+        include 'controllers/settings_controller.php';
+        break;
     default:
         include 'views/dashboard_enhanced.php';
 }

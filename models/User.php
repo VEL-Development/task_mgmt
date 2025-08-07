@@ -113,5 +113,12 @@ class User {
         $stmt->execute();
         return $stmt;
     }
+    
+    public function getById($id) {
+        $query = "SELECT * FROM " . $this->table_name . " WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }
 ?>
