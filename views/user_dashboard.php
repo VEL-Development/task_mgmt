@@ -240,6 +240,64 @@ $completionRate = $userTasks['total'] > 0 ? round(($userTasks['completed'] / $us
     </div>
 </div>
 
+<!-- Edit User Modal -->
+<div id="editUserModal" class="modal">
+    <div class="modal-content modal-enhanced">
+        <div class="modal-header">
+            <div class="modal-title">
+                <div class="modal-icon">
+                    <i class="fas fa-user-edit"></i>
+                </div>
+                <div>
+                    <h3>Edit User</h3>
+                    <p>Update user information and permissions</p>
+                </div>
+            </div>
+            <button class="modal-close" onclick="closeModal('editUserModal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="editUserForm" class="modal-form">
+            <input type="hidden" name="user_id" id="edit_user_id">
+            <div class="form-section">
+                <h4><i class="fas fa-user"></i> Personal Information</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-id-card"></i> Full Name</label>
+                        <input type="text" name="full_name" id="edit_full_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-at"></i> Username</label>
+                        <input type="text" name="username" id="edit_username" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Email Address</label>
+                    <input type="email" name="email" id="edit_email" required>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h4><i class="fas fa-user-tag"></i> Role & Permissions</h4>
+                <div class="form-group">
+                    <div class="role-selector" id="edit_role_selector">
+                        <!-- Role options will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeModal('editUserModal')">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="button" class="btn-submit" onclick="updateUser()">
+                    <i class="fas fa-save"></i> Update User
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
 function filterTasks() {
     const filter = document.getElementById('taskFilter').value;
@@ -256,8 +314,77 @@ function filterTasks() {
     });
 }
 
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
 function editUser(id) {
-    window.location.href = `index.php?action=user_management#edit-${id}`;
+    fetch(`controllers/user_controller.php?action=get&id=${id}`)
+        .then(response => response.json())
+        .then(user => {
+            document.getElementById('edit_user_id').value = user.id;
+            document.getElementById('edit_full_name').value = user.full_name;
+            document.getElementById('edit_username').value = user.username;
+            document.getElementById('edit_email').value = user.email;
+            
+            const roleSelector = document.getElementById('edit_role_selector');
+            roleSelector.innerHTML = `
+                <input type="radio" name="role" value="member" id="edit_role_member" ${user.role === 'member' ? 'checked' : ''}>
+                <label for="edit_role_member" class="role-option">
+                    <i class="fas fa-user"></i>
+                    <span>Member</span>
+                    <small>Basic access to assigned tasks</small>
+                </label>
+                
+                <input type="radio" name="role" value="team_lead" id="edit_role_lead" ${user.role === 'team_lead' ? 'checked' : ''}>
+                <label for="edit_role_lead" class="role-option">
+                    <i class="fas fa-star"></i>
+                    <span>Team Lead</span>
+                    <small>Manage team tasks and members</small>
+                </label>
+                
+                <input type="radio" name="role" value="admin" id="edit_role_admin" ${user.role === 'admin' ? 'checked' : ''}>
+                <label for="edit_role_admin" class="role-option">
+                    <i class="fas fa-crown"></i>
+                    <span>Admin</span>
+                    <small>Full system access and control</small>
+                </label>
+            `;
+            
+            document.getElementById('editUserModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        })
+        .catch(error => {
+            Swal.fire('Error!', 'Failed to load user data', 'error');
+        });
+}
+
+
+
+function updateUser() {
+    const form = document.getElementById('editUserForm');
+    const formData = new FormData(form);
+    formData.append('action', 'update');
+    
+    fetch('controllers/user_controller.php', {
+        method: 'POST',
+        body: formData
+    }).then(response => response.text()).then(result => {
+        if (result === 'success') {
+            Swal.fire({
+                title: 'Success!',
+                text: 'User updated successfully',
+                icon: 'success',
+                confirmButtonColor: '#10b981'
+            }).then(() => {
+                closeModal('editUserModal');
+                location.reload();
+            });
+        } else {
+            Swal.fire('Error!', 'Failed to update user', 'error');
+        }
+    });
 }
 
 // Initialize animations
