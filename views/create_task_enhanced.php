@@ -261,14 +261,20 @@ document.addEventListener('DOMContentLoaded', function() {
             const url = new URL(response.url);
             if (url.searchParams.get('success') === 'created') {
                 Swal.fire({
-                    title: 'Success!',
-                    text: 'Task created successfully!',
-                    icon: 'success',
+                    title: 'Task Created!',
+                    html: '<div style="text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 3rem; margin-bottom: 1rem;"></i><br><strong>Your task has been created successfully</strong><br><small style="color: #6b7280;">You can now view it in your dashboard</small></div>',
+                    icon: false,
+                    confirmButtonText: '<i class="fas fa-eye"></i> View Dashboard',
+                    showCancelButton: true,
+                    cancelButtonText: '<i class="fas fa-plus"></i> Create Another',
                     confirmButtonColor: '#6366f1',
-                    showConfirmButton: false,
-                    timer: 2000
-                }).then(() => {
-                    window.location.href = 'index.php';
+                    cancelButtonColor: '#10b981'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = 'index.php';
+                    } else if (result.dismiss === Swal.DismissReason.cancel) {
+                        window.location.reload();
+                    }
                 });
             } else {
                 throw new Error('Failed to create task');
@@ -277,16 +283,20 @@ document.addEventListener('DOMContentLoaded', function() {
             return response.text().then(data => {
                 if (data.includes('success=created')) {
                     Swal.fire({
-                        title: 'Success!',
-                        text: 'Task created successfully!',
-                        icon: 'success',
+                        title: 'Task Created!',
+                        html: '<div style="text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 3rem; margin-bottom: 1rem;"></i><br><strong>Your task has been created successfully</strong><br><small style="color: #6b7280;">You can now view it in your dashboard</small></div>',
+                        icon: false,
+                        confirmButtonText: '<i class="fas fa-eye"></i> View Dashboard',
+                        showCancelButton: true,
+                        cancelButtonText: '<i class="fas fa-plus"></i> Create Another',
                         confirmButtonColor: '#6366f1',
-                        showConfirmButton: false,
-                        timer: 2000
-                    }).then(() => {
-                        const urlParams = new URLSearchParams(window.location.search);
-                        const taskId = formData.get('task_id') || 'latest';
-                        window.location.href = 'index.php';
+                        cancelButtonColor: '#10b981'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = 'index.php';
+                        } else if (result.dismiss === Swal.DismissReason.cancel) {
+                            window.location.reload();
+                        }
                     });
                 } else {
                     throw new Error('Failed to create task');

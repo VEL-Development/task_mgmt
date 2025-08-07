@@ -239,34 +239,41 @@ include 'includes/header.php';
 <script>
 // Mini trend charts for report cards
 function createTrendChart(canvasId, data, color) {
-    const ctx = document.getElementById(canvasId)?.getContext('2d');
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['', '', '', '', '', '', ''],
-            datasets: [{
-                data: data,
-                borderColor: color,
-                backgroundColor: color + '20',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.4,
-                pointRadius: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { display: false },
-                y: { display: false }
+    try {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['', '', '', '', '', '', ''],
+                datasets: [{
+                    data: data,
+                    borderColor: color,
+                    backgroundColor: color + '20',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0
+                }]
             },
-            elements: { point: { radius: 0 } }
-        }
-    });
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { display: false },
+                    y: { display: false }
+                },
+                elements: { point: { radius: 0 } }
+            }
+        });
+    } catch (error) {
+        console.log('Chart creation skipped for ' + canvasId);
+    }
 }
 
 // Create trend charts
@@ -390,7 +397,7 @@ function createPriorityChart(type = 'bar') {
     priorityChart = new Chart(priorityCtx, config);
 }
 
-createePriorityChart();
+createPriorityChart();
 
 // View toggle functionality
 document.querySelectorAll('.view-toggle').forEach(btn => {
@@ -425,24 +432,69 @@ document.addEventListener('DOMContentLoaded', function() {
         }, index * 150);
     });
     
-    // Animate progress bars
+    // Animate progress bars with proper width/height handling
     setTimeout(() => {
-        document.querySelectorAll('.progress-fill, .priority-segment, .indicator-bar').forEach(bar => {
-            const width = bar.style.width || bar.style.height;
-            bar.style.width = '0';
-            bar.style.height = '0';
-            
-            setTimeout(() => {
-                bar.style.transition = 'all 1s ease-out';
-                if (width.includes('width')) {
-                    bar.style.width = width;
-                } else {
-                    bar.style.height = width;
-                }
-            }, 500);
+        document.querySelectorAll('.progress-fill').forEach(bar => {
+            const originalWidth = bar.style.width;
+            if (originalWidth) {
+                bar.style.width = '0';
+                setTimeout(() => {
+                    bar.style.transition = 'width 1s ease-out';
+                    bar.style.width = originalWidth;
+                }, 100);
+            }
+        });
+        
+        document.querySelectorAll('.priority-segment').forEach(segment => {
+            const originalWidth = segment.style.width;
+            if (originalWidth) {
+                segment.style.width = '0';
+                setTimeout(() => {
+                    segment.style.transition = 'width 1s ease-out';
+                    segment.style.width = originalWidth;
+                }, 200);
+            }
+        });
+        
+        document.querySelectorAll('.indicator-bar').forEach(bar => {
+            const originalHeight = bar.style.height;
+            if (originalHeight) {
+                bar.style.height = '0';
+                setTimeout(() => {
+                    bar.style.transition = 'height 1s ease-out';
+                    bar.style.height = originalHeight;
+                }, 300);
+            }
         });
     }, 1000);
+    
+    // Initialize productivity metrics animation
+    animateProductivityMetrics();
+    
+    // Initialize urgent tasks indicator
+    animateUrgentIndicator();
 });
+
+// Productivity metrics animation
+function animateProductivityMetrics() {
+    const metricItems = document.querySelectorAll('.metric-item');
+    metricItems.forEach((item, index) => {
+        setTimeout(() => {
+            item.style.opacity = '1';
+            item.style.transform = 'translateX(0)';
+        }, index * 200);
+    });
+}
+
+// Urgent tasks indicator animation
+function animateUrgentIndicator() {
+    const urgentCard = document.querySelector('.urgent-card');
+    const urgentCount = <?php echo $stats['priority_urgent']; ?>;
+    
+    if (urgentCount > 0) {
+        urgentCard?.classList.add('pulse-warning');
+    }
+}
 </script>
 
 <?php include 'includes/footer.php'; ?>

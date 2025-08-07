@@ -47,6 +47,18 @@ class Task {
         return $stmt;
     }
 
+    public function readRecent($limit = 6) {
+        $query = "SELECT t.*, u1.full_name as assigned_name, u2.full_name as creator_name 
+                  FROM " . $this->table_name . " t 
+                  LEFT JOIN users u1 ON t.assigned_to = u1.id 
+                  LEFT JOIN users u2 ON t.created_by = u2.id 
+                  ORDER BY t.created_at DESC LIMIT :limit";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt;
+    }
+
     public function update() {
         $query = "UPDATE " . $this->table_name . " SET title=:title, description=:description, status=:status, priority=:priority, assigned_to=:assigned_to, due_date=:due_date WHERE id=:id";
         $stmt = $this->conn->prepare($query);

@@ -2,7 +2,7 @@
 require_once 'models/TaskEnhanced.php';
 
 $task = new TaskEnhanced($db);
-$stmt = $task->read();
+$stmt = $task->readRecent();
 $page_title = "Dashboard";
 
 // Get statistics

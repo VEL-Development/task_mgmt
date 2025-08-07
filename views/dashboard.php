@@ -1,7 +1,7 @@
 <?php
 $task = new Task($db);
 $user = new User($db);
-$stmt = $task->read();
+$stmt = $task->readRecent();
 $users_stmt = $user->getAllUsers();
 $page_title = "Dashboard";
 include 'includes/header.php';
