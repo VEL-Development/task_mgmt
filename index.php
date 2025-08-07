@@ -53,6 +53,9 @@ switch($action) {
     case 'user_management':
         include 'views/user_management.php';
         break;
+    case 'export_csv':
+        include 'controllers/export_controller.php';
+        break;
     default:
         include 'views/dashboard_enhanced.php';
 }
