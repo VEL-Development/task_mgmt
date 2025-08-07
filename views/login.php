@@ -61,10 +61,7 @@
                 
 
                 
-                <div class="register-link">
-                    <span>Don't have an account?</span>
-                    <a href="index.php?action=register">Create one</a>
-                </div>
+
             </div>
         </div>
         

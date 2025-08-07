@@ -267,5 +267,27 @@ class TaskEnhanced extends Task {
         $stmt->execute($params);
         return $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     }
+    
+    public function getUserTaskStats($user_id) {
+        $stats = ['total' => 0, 'completed' => 0, 'pending' => 0, 'in_progress' => 0];
+        
+        $query = "SELECT status, COUNT(*) as count FROM tasks WHERE assigned_to = ? GROUP BY status";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$user_id]);
+        
+        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $stats[$row['status']] = $row['count'];
+            $stats['total'] += $row['count'];
+        }
+        
+        return $stats;
+    }
+    
+    public function getUserRecentTasks($user_id, $limit = 5) {
+        $query = "SELECT id, title, status, priority, created_at FROM tasks WHERE assigned_to = ? ORDER BY created_at DESC LIMIT ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$user_id, $limit]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 ?>

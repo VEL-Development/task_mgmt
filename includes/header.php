@@ -8,6 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="assets/css/modern.css" rel="stylesheet">
+    <link href="assets/css/user_management.css" rel="stylesheet">
+    <link href="assets/css/user_dashboard.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -24,6 +26,9 @@
                 <a href="?action=tasks_list" class="nav-link"><i class="fas fa-list"></i> Tasks</a>
                 <a href="?action=create_task" class="nav-link"><i class="fas fa-plus"></i> New Task</a>
                 <a href="?action=reports" class="nav-link"><i class="fas fa-chart-bar"></i> Reports</a>
+                <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                <a href="?action=user_management" class="nav-link"><i class="fas fa-users"></i> Users</a>
+                <?php endif; ?>
                 <div class="nav-user" onclick="toggleUserMenu()">
                     <div class="user-avatar"><?php echo strtoupper(substr($_SESSION['full_name'], 0, 1)); ?></div>
                     <span><?php echo $_SESSION['full_name']; ?></span>

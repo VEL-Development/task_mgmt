@@ -22,17 +22,6 @@ if (isset($_POST['action']) && $_POST['action'] == 'login') {
     } else {
         header("Location: index.php?action=login&error=1");
     }
-} elseif (isset($_POST['action']) && $_POST['action'] == 'register') {
-    $user->username = $_POST['username'];
-    $user->email = $_POST['email'];
-    $user->password = $_POST['password'];
-    $user->full_name = $_POST['full_name'];
-    
-    if ($user->register()) {
-        header("Location: index.php?action=login&success=1");
-    } else {
-        header("Location: index.php?action=register&error=1");
-    }
 } elseif (isset($_GET['action']) && $_GET['action'] == 'logout') {
     session_destroy();
     header("Location: ../index.php?action=login");

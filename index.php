@@ -9,7 +9,7 @@ $db = $database->getConnection();
 
 $action = isset($_GET['action']) ? $_GET['action'] : 'dashboard';
 
-if (!isset($_SESSION['user_id']) && $action != 'login' && $action != 'register' && $action != 'auth') {
+if (!isset($_SESSION['user_id']) && $action != 'login' && $action != 'auth') {
     header("Location: index.php?action=login");
     exit();
 }
@@ -18,9 +18,7 @@ switch($action) {
     case 'login':
         include 'views/login.php';
         break;
-    case 'register':
-        include 'views/register.php';
-        break;
+
     case 'auth':
         include 'controllers/auth.php';
         break;
@@ -48,6 +46,9 @@ switch($action) {
         break;
     case 'tasks_list':
         include 'views/tasks_list.php';
+        break;
+    case 'user_management':
+        include 'views/user_management.php';
         break;
     default:
         include 'views/dashboard_enhanced.php';
