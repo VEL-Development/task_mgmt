@@ -126,7 +126,7 @@ $completionRate = $userTasks['total'] > 0 ? round(($userTasks['completed'] / $us
                 </div>
             </div>
             
-            <div class="metric-card cancelled">
+            <!-- <div class="metric-card cancelled">
                 <div class="metric-icon">
                     <i class="fas fa-times-circle"></i>
                 </div>
@@ -138,7 +138,7 @@ $completionRate = $userTasks['total'] > 0 ? round(($userTasks['completed'] / $us
                     <i class="fas fa-minus"></i>
                     <span>0%</span>
                 </div>
-            </div>
+            </div> -->
         </div>
 
         <div class="dashboard-grid">

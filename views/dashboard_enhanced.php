@@ -61,16 +61,7 @@ include 'includes/header.php';
             <i class="fas fa-check-circle"></i>
         </div>
     </div>
-    <div class="stat-card stat-cancelled">
-        <div class="stat-content">
-            <div class="stat-number"><?php echo $stats['cancelled']; ?></div>
-            <div class="stat-label">Cancelled</div>
-            <div class="stat-trend">-<?php echo rand(1,3); ?>% this month</div>
-        </div>
-        <div class="stat-icon-wrapper">
-            <i class="fas fa-times-circle"></i>
-        </div>
-    </div>
+
 </div>
 
 <!-- Analytics Section -->
@@ -403,6 +394,16 @@ function deleteTask(taskId) {
 
 // Add smooth animations on load
 document.addEventListener('DOMContentLoaded', function() {
+    // Remove any duplicate cards that might cause scrolling
+    const dashboardStats = document.querySelector('.dashboard-stats');
+    if (dashboardStats) {
+        const statCards = dashboardStats.querySelectorAll('.stat-card');
+        // Keep only the first 4 cards (original ones)
+        for (let i = 4; i < statCards.length; i++) {
+            statCards[i].remove();
+        }
+    }
+    
     const cards = document.querySelectorAll('.task-card-modern, .stat-card, .chart-card');
     cards.forEach((card, index) => {
         card.style.opacity = '0';

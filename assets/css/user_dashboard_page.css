@@ -358,10 +358,10 @@
 }
 
 /* Tasks List */
-.tasks-list {
+/* .tasks-list {
     max-height: 600px;
     overflow-y: auto;
-}
+} */
 
 .task-item {
     display: flex;

@@ -11,6 +11,8 @@ $status_filter = $_GET['status'] ?? '';
 $priority_filter = $_GET['priority'] ?? '';
 $assigned_filter = $_GET['assigned'] ?? '';
 $search = $_GET['search'] ?? '';
+$start_date_filter = $_GET['start_date'] ?? '';
+$due_date_filter = $_GET['due_date'] ?? '';
 $page = max(1, (int)($_GET['page'] ?? 1));
 $per_page = 10;
 
@@ -34,6 +36,14 @@ if ($search) {
     $where_conditions[] = "(t.title LIKE ? OR t.description LIKE ?)";
     $params[] = "%$search%";
     $params[] = "%$search%";
+}
+if ($start_date_filter) {
+    $where_conditions[] = "DATE(t.start_date) >= ?";
+    $params[] = $start_date_filter;
+}
+if ($due_date_filter) {
+    $where_conditions[] = "DATE(t.due_date) <= ?";
+    $params[] = $due_date_filter;
 }
 
 $tasks = $task->getTasksWithPagination($where_conditions, $params, $page, $per_page);
@@ -105,12 +115,22 @@ include 'includes/header.php';
                 </select>
             </div>
             
+            <div class="filter-group">
+                <label><i class="fas fa-calendar-plus"></i> Start Date From</label>
+                <input type="date" name="start_date" value="<?php echo htmlspecialchars($start_date_filter); ?>">
+            </div>
+            
+            <div class="filter-group">
+                <label><i class="fas fa-calendar-times"></i> Due Date Until</label>
+                <input type="date" name="due_date" value="<?php echo htmlspecialchars($due_date_filter); ?>">
+            </div>
+            
             <div class="filter-actions">
                 <button type="submit" class="btn-filter">
-                    <i class="fas fa-filter"></i> Filter
+                    <i class="fas fa-filter"></i>
                 </button>
                 <a href="index.php?action=tasks_list" class="btn-filter btn-clear">
-                    <i class="fas fa-times"></i> Clear
+                    <i class="fas fa-times"></i>
                 </a>
             </div>
         </form>
@@ -172,20 +192,20 @@ include 'includes/header.php';
         <?php if ($total_pages > 1): ?>
         <div class="pagination">
             <?php if ($page > 1): ?>
-            <a href="?action=tasks_list&page=<?php echo $page-1; ?>&status=<?php echo $status_filter; ?>&priority=<?php echo $priority_filter; ?>&assigned=<?php echo $assigned_filter; ?>&search=<?php echo urlencode($search); ?>" class="page-btn">
+            <a href="?action=tasks_list&page=<?php echo $page-1; ?>&status=<?php echo $status_filter; ?>&priority=<?php echo $priority_filter; ?>&assigned=<?php echo $assigned_filter; ?>&search=<?php echo urlencode($search); ?>&start_date=<?php echo $start_date_filter; ?>&due_date=<?php echo $due_date_filter; ?>" class="page-btn">
                 <i class="fas fa-chevron-left"></i>
             </a>
             <?php endif; ?>
             
             <?php for ($i = max(1, $page-2); $i <= min($total_pages, $page+2); $i++): ?>
-            <a href="?action=tasks_list&page=<?php echo $i; ?>&status=<?php echo $status_filter; ?>&priority=<?php echo $priority_filter; ?>&assigned=<?php echo $assigned_filter; ?>&search=<?php echo urlencode($search); ?>" 
+            <a href="?action=tasks_list&page=<?php echo $i; ?>&status=<?php echo $status_filter; ?>&priority=<?php echo $priority_filter; ?>&assigned=<?php echo $assigned_filter; ?>&search=<?php echo urlencode($search); ?>&start_date=<?php echo $start_date_filter; ?>&due_date=<?php echo $due_date_filter; ?>" 
                class="page-btn <?php echo $i == $page ? 'active' : ''; ?>">
                 <?php echo $i; ?>
             </a>
             <?php endfor; ?>
             
             <?php if ($page < $total_pages): ?>
-            <a href="?action=tasks_list&page=<?php echo $page+1; ?>&status=<?php echo $status_filter; ?>&priority=<?php echo $priority_filter; ?>&assigned=<?php echo $assigned_filter; ?>&search=<?php echo urlencode($search); ?>" class="page-btn">
+            <a href="?action=tasks_list&page=<?php echo $page+1; ?>&status=<?php echo $status_filter; ?>&priority=<?php echo $priority_filter; ?>&assigned=<?php echo $assigned_filter; ?>&search=<?php echo urlencode($search); ?>&start_date=<?php echo $start_date_filter; ?>&due_date=<?php echo $due_date_filter; ?>" class="page-btn">
                 <i class="fas fa-chevron-right"></i>
             </a>
             <?php endif; ?>

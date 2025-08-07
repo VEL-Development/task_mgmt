@@ -185,16 +185,7 @@ include 'includes/header.php';
                         </div>
                     </div>
                 </div>
-                <div class="metric-item">
-                    <div class="metric-icon"><i class="fas fa-times-circle"></i></div>
-                    <div class="metric-data">
-                        <span class="metric-value"><?php echo $stats['cancelled']; ?></span>
-                        <span class="metric-label">Cancelled</span>
-                        <div class="metric-progress">
-                            <div class="progress-fill cancelled" style="width: <?php echo $stats['total'] > 0 ? ($stats['cancelled'] / $stats['total']) * 100 : 0; ?>%;"></div>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         </div>
     </div>
