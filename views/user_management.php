@@ -26,73 +26,197 @@ $users = $user->getAllUsers();
         </button>
     </div>
 
-    <div class="users-grid">
-        <?php foreach ($users as $u): 
-            $userTasks = $task->getUserTaskStats($u['id']);
-        ?>
-        <div class="user-card <?= $u['status'] === 'inactive' ? 'inactive' : '' ?>">
-            <div class="user-header">
-                <div class="user-avatar-large">
-                    <?= strtoupper(substr($u['full_name'], 0, 2)) ?>
+    <div class="users-container">
+        <div class="users-header">
+            <div class="users-stats">
+                <?php 
+                $totalUsers = count($users);
+                $activeUsers = count(array_filter($users, fn($u) => ($u['status'] ?? 'active') === 'active'));
+                $adminCount = count(array_filter($users, fn($u) => $u['role'] === 'admin'));
+                ?>
+                <div class="stat-card-mini">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-number"><?= $totalUsers ?></div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
                 </div>
-                <div class="user-info">
-                    <h3 class="user-name"><?= htmlspecialchars($u['full_name']) ?></h3>
-                    <p class="user-username">@<?= htmlspecialchars($u['username']) ?></p>
-                    <span class="role-badge role-<?= $u['role'] ?>">
-                        <i class="fas fa-<?= $u['role'] === 'admin' ? 'crown' : ($u['role'] === 'team_lead' ? 'star' : 'user') ?>"></i>
-                        <?= ucfirst(str_replace('_', ' ', $u['role'])) ?>
-                    </span>
+                <div class="stat-card-mini">
+                    <div class="stat-icon active"><i class="fas fa-user-check"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-number"><?= $activeUsers ?></div>
+                        <div class="stat-label">Active Users</div>
+                    </div>
                 </div>
-                <div class="user-status">
-                    <span class="status-indicator <?= $u['status'] ?? 'active' ?>">
-                        <?= ($u['status'] ?? 'active') === 'active' ? 'Active' : 'Inactive' ?>
-                    </span>
-                </div>
-            </div>
-            
-            <div class="user-stats">
-                <div class="stat-item">
-                    <div class="stat-number"><?= $userTasks['total'] ?? 0 ?></div>
-                    <div class="stat-label">Total Tasks</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number"><?= $userTasks['completed'] ?? 0 ?></div>
-                    <div class="stat-label">Completed</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number"><?= $userTasks['pending'] ?? 0 ?></div>
-                    <div class="stat-label">Pending</div>
+                <div class="stat-card-mini">
+                    <div class="stat-icon admin"><i class="fas fa-crown"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-number"><?= $adminCount ?></div>
+                        <div class="stat-label">Administrators</div>
+                    </div>
                 </div>
             </div>
             
-            <div class="user-meta">
-                <div class="meta-item">
-                    <i class="fas fa-envelope"></i>
-                    <?= htmlspecialchars($u['email']) ?>
+            <div class="users-filters">
+                <div class="filter-group">
+                    <select id="roleFilter" onchange="filterUsers()">
+                        <option value="">All Roles</option>
+                        <option value="admin">Admin</option>
+                        <option value="team_lead">Team Lead</option>
+                        <option value="member">Member</option>
+                    </select>
                 </div>
-                <div class="meta-item">
-                    <i class="fas fa-calendar"></i>
-                    Joined <?= date('M j, Y', strtotime($u['created_at'])) ?>
+                <div class="filter-group">
+                    <select id="statusFilter" onchange="filterUsers()">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
                 </div>
-            </div>
-            
-            <div class="user-actions">
-                <button class="btn-action btn-view" onclick="viewUserDashboard(<?= $u['id'] ?>)" title="View Dashboard">
-                    <i class="fas fa-chart-pie"></i>
-                </button>
-                <button class="btn-action btn-edit" onclick="editUser(<?= $u['id'] ?>)" title="Edit User">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <?php if ($u['id'] != $_SESSION['user_id']): ?>
-                <button class="btn-action <?= ($u['status'] ?? 'active') === 'active' ? 'btn-deactivate' : 'btn-activate' ?>" 
-                        onclick="toggleUserStatus(<?= $u['id'] ?>, '<?= ($u['status'] ?? 'active') === 'active' ? 'inactive' : 'active' ?>')" 
-                        title="<?= ($u['status'] ?? 'active') === 'active' ? 'Deactivate' : 'Activate' ?> User">
-                    <i class="fas fa-<?= ($u['status'] ?? 'active') === 'active' ? 'user-slash' : 'user-check' ?>"></i>
-                </button>
-                <?php endif; ?>
             </div>
         </div>
-        <?php endforeach; ?>
+        
+        <div class="users-grid" id="usersGrid">
+            <?php foreach ($users as $u): 
+                $userTasks = $task->getUserTaskStats($u['id']);
+                $completionRate = $userTasks['total'] > 0 ? round(($userTasks['completed'] / $userTasks['total']) * 100) : 0;
+            ?>
+            <div class="user-card <?= ($u['status'] ?? 'active') === 'inactive' ? 'inactive' : '' ?>" 
+                 data-role="<?= $u['role'] ?>" data-status="<?= $u['status'] ?? 'active' ?>">
+                
+                <div class="user-card-header">
+                    <div class="user-avatar-container">
+                        <div class="user-avatar-large role-<?= $u['role'] ?>">
+                            <?= strtoupper(substr($u['full_name'], 0, 2)) ?>
+                        </div>
+                        <div class="status-dot <?= ($u['status'] ?? 'active') === 'active' ? 'active' : 'inactive' ?>"></div>
+                    </div>
+                    
+                    <div class="user-info">
+                        <h3 class="user-name"><?= htmlspecialchars($u['full_name']) ?></h3>
+                        <p class="user-username">@<?= htmlspecialchars($u['username']) ?></p>
+                        <div class="user-badges">
+                            <span class="role-badge role-<?= $u['role'] ?>">
+                                <i class="fas fa-<?= $u['role'] === 'admin' ? 'crown' : ($u['role'] === 'team_lead' ? 'star' : 'user') ?>"></i>
+                                <?= ucfirst(str_replace('_', ' ', $u['role'])) ?>
+                            </span>
+                            <span class="status-badge status-<?= ($u['status'] ?? 'active') === 'active' ? 'active' : 'inactive' ?>">
+                                <i class="fas fa-<?= ($u['status'] ?? 'active') === 'active' ? 'check-circle' : 'times-circle' ?>"></i>
+                                <?= ($u['status'] ?? 'active') === 'active' ? 'Active' : 'Inactive' ?>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="user-menu">
+                        <button class="menu-toggle" onclick="toggleUserMenu(<?= $u['id'] ?>)">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <div class="user-dropdown" id="userMenu<?= $u['id'] ?>">
+                            <a href="#" onclick="viewUserDashboard(<?= $u['id'] ?>)" class="dropdown-item">
+                                <i class="fas fa-chart-pie"></i> View Dashboard
+                            </a>
+                            <a href="#" onclick="editUser(<?= $u['id'] ?>)" class="dropdown-item">
+                                <i class="fas fa-edit"></i> Edit User
+                            </a>
+                            <?php if ($u['id'] != $_SESSION['user_id']): ?>
+                            <div class="dropdown-divider"></div>
+                            <a href="#" onclick="toggleUserStatus(<?= $u['id'] ?>, '<?= ($u['status'] ?? 'active') === 'active' ? 'inactive' : 'active' ?>')" 
+                               class="dropdown-item <?= ($u['status'] ?? 'active') === 'active' ? 'danger' : 'success' ?>">
+                                <i class="fas fa-<?= ($u['status'] ?? 'active') === 'active' ? 'user-slash' : 'user-check' ?>"></i> 
+                                <?= ($u['status'] ?? 'active') === 'active' ? 'Deactivate' : 'Activate' ?>
+                            </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="user-performance">
+                    <div class="performance-header">
+                        <h4><i class="fas fa-chart-line"></i> Performance Overview</h4>
+                        <div class="completion-rate">
+                            <span class="rate-number"><?= $completionRate ?>%</span>
+                            <span class="rate-label">Completion</span>
+                        </div>
+                    </div>
+                    
+                    <div class="task-stats-grid">
+                        <div class="stat-item total">
+                            <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+                            <div class="stat-data">
+                                <div class="stat-number"><?= $userTasks['total'] ?? 0 ?></div>
+                                <div class="stat-label">Total</div>
+                            </div>
+                        </div>
+                        <div class="stat-item completed">
+                            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                            <div class="stat-data">
+                                <div class="stat-number"><?= $userTasks['completed'] ?? 0 ?></div>
+                                <div class="stat-label">Done</div>
+                            </div>
+                        </div>
+                        <div class="stat-item progress">
+                            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                            <div class="stat-data">
+                                <div class="stat-number"><?= $userTasks['in_progress'] ?? 0 ?></div>
+                                <div class="stat-label">Active</div>
+                            </div>
+                        </div>
+                        <div class="stat-item pending">
+                            <div class="stat-icon"><i class="fas fa-pause-circle"></i></div>
+                            <div class="stat-data">
+                                <div class="stat-number"><?= $userTasks['pending'] ?? 0 ?></div>
+                                <div class="stat-label">Pending</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <?php if ($userTasks['total'] > 0): ?>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: <?= $completionRate ?>%"></div>
+                        </div>
+                        <div class="progress-labels">
+                            <span>Progress</span>
+                            <span><?= $completionRate ?>% Complete</span>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                </div>
+                
+                <div class="user-meta">
+                    <div class="meta-row">
+                        <div class="meta-item">
+                            <i class="fas fa-envelope"></i>
+                            <span><?= htmlspecialchars($u['email']) ?></span>
+                        </div>
+                    </div>
+                    <div class="meta-row">
+                        <div class="meta-item">
+                            <i class="fas fa-calendar-plus"></i>
+                            <span>Joined <?= date('M j, Y', strtotime($u['created_at'])) ?></span>
+                        </div>
+                        <?php if (($u['status'] ?? 'active') === 'active'): ?>
+                        <div class="meta-item">
+                            <i class="fas fa-circle online-indicator"></i>
+                            <span>Online</span>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                
+                <div class="user-actions">
+                    <button class="btn-action-primary" onclick="viewUserDashboard(<?= $u['id'] ?>)">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>View Dashboard</span>
+                    </button>
+                    <button class="btn-action-secondary" onclick="editUser(<?= $u['id'] ?>)">
+                        <i class="fas fa-edit"></i>
+                        <span>Edit</span>
+                    </button>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
     </div>
 </div>
 
@@ -358,14 +482,70 @@ function toggleUserStatus(id, status) {
     });
 }
 
+function toggleUserMenu(userId) {
+    const menu = document.getElementById(`userMenu${userId}`);
+    // Close all other menus
+    document.querySelectorAll('.user-dropdown').forEach(m => {
+        if (m.id !== `userMenu${userId}`) m.classList.remove('show');
+    });
+    menu.classList.toggle('show');
+}
+
+function filterUsers() {
+    const roleFilter = document.getElementById('roleFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    const userCards = document.querySelectorAll('.user-card');
+    
+    userCards.forEach(card => {
+        const role = card.dataset.role;
+        const status = card.dataset.status;
+        
+        const roleMatch = !roleFilter || role === roleFilter;
+        const statusMatch = !statusFilter || status === statusFilter;
+        
+        if (roleMatch && statusMatch) {
+            card.style.display = 'block';
+            card.style.animation = 'fadeIn 0.3s ease';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
 function viewUserDashboard(id) {
+    // Show loading state
+    document.getElementById('userDashboardContent').innerHTML = `
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading user dashboard...</p>
+        </div>
+    `;
+    document.getElementById('userDashboardModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    
     fetch(`controllers/user_controller.php?action=dashboard&id=${id}`)
         .then(response => response.text())
         .then(html => {
             document.getElementById('userDashboardContent').innerHTML = html;
-            document.getElementById('userDashboardModal').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
+            // Initialize dashboard charts if needed
+            initializeDashboardCharts();
+        })
+        .catch(error => {
+            document.getElementById('userDashboardContent').innerHTML = `
+                <div class="error-state">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Failed to load dashboard</p>
+                </div>
+            `;
         });
+}
+
+function initializeDashboardCharts() {
+    // Initialize any charts in the dashboard modal
+    const chartElements = document.querySelectorAll('.chart-container');
+    chartElements.forEach(element => {
+        // Chart initialization code would go here
+    });
 }
 
 // Form submissions
@@ -424,7 +604,40 @@ window.onclick = function(event) {
         event.target.style.display = 'none';
         document.body.style.overflow = 'auto';
     }
+    
+    // Close user menus when clicking outside
+    if (!event.target.closest('.user-menu')) {
+        document.querySelectorAll('.user-dropdown').forEach(menu => {
+            menu.classList.remove('show');
+        });
+    }
 }
+
+// Add keyboard navigation
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        // Close all modals
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.style.display = 'none';
+        });
+        document.body.style.overflow = 'auto';
+        
+        // Close all dropdowns
+        document.querySelectorAll('.user-dropdown').forEach(menu => {
+            menu.classList.remove('show');
+        });
+    }
+});
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    // Add smooth animations to cards
+    const cards = document.querySelectorAll('.user-card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('fade-in');
+    });
+});
 </script>
 
 <?php include 'includes/footer.php'; ?>
