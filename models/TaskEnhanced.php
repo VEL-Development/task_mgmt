@@ -348,6 +348,47 @@ class TaskEnhanced extends Task {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
+    public function getUserRecentActivity($user_id, $limit = 10) {
+        $query = "SELECT 
+                    'task_created' as activity_type,
+                    t.id as task_id,
+                    t.title,
+                    t.priority,
+                    t.created_at as activity_date,
+                    ts.name as status_name,
+                    ts.color as status_color,
+                    ts.group_status,
+                    u.full_name as creator_name
+                  FROM tasks t
+                  LEFT JOIN task_statuses ts ON t.status_id = ts.id
+                  LEFT JOIN users u ON t.created_by = u.id
+                  WHERE t.assigned_to = ?
+                  
+                  UNION ALL
+                  
+                  SELECT 
+                    CONCAT('task_', a.action) as activity_type,
+                    a.task_id,
+                    t.title,
+                    t.priority,
+                    a.created_at as activity_date,
+                    ts.name as status_name,
+                    ts.color as status_color,
+                    ts.group_status,
+                    a_user.full_name as creator_name
+                  FROM task_audit a
+                  JOIN tasks t ON a.task_id = t.id
+                  LEFT JOIN task_statuses ts ON t.status_id = ts.id
+                  LEFT JOIN users a_user ON a.user_id = a_user.id
+                  WHERE t.assigned_to = ? AND a.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+                  
+                  ORDER BY activity_date DESC
+                  LIMIT " . (int)$limit;
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$user_id, $user_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
     public function getUserTasks($user_id, $limit = 5) {
         $query = "SELECT t.*, 
                          ts.name as status_name,

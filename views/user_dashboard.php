@@ -20,6 +20,7 @@ $task = new TaskEnhanced($db);
 $userData = $user->getUserById($userId);
 $userTasks = $task->getUserTaskStats($userId);
 $recentTasks = $task->getUserRecentTasks($userId, 10);
+$recentActivity = $task->getUserRecentActivity($userId, 15);
 $allUserTasks = $task->getAllUserTasks($userId, 50);
 $completionRate = $userTasks['total'] > 0 ? round(($userTasks['completed'] / $userTasks['total']) * 100) : 0;
 ?>
@@ -223,31 +224,69 @@ $completionRate = $userTasks['total'] > 0 ? round(($userTasks['completed'] / $us
             <div class="activity-section">
                 <div class="section-header">
                     <h3><i class="fas fa-history"></i> Recent Activity</h3>
+                    <div class="activity-filter">
+                        <select id="activityFilter" onchange="filterActivity()">
+                            <option value="">All Activity</option>
+                            <option value="task_created">Task Created</option>
+                            <option value="task_updated">Task Updated</option>
+                            <option value="task_completed">Task Completed</option>
+                        </select>
+                    </div>
                 </div>
                 
-                <div class="activity-timeline">
-                    <?php if (empty($recentTasks)): ?>
+                <div class="activity-timeline enhanced">
+                    <?php if (empty($recentActivity)): ?>
                     <div class="empty-state">
                         <i class="fas fa-clock"></i>
                         <p>No recent activity</p>
                     </div>
                     <?php else: ?>
-                    <?php foreach ($recentTasks as $t): ?>
-                    <div class="timeline-item">
-                        <div class="timeline-marker status-<?= $t['group_status'] ?? 'pending' ?>">
-                            <i class="fas fa-<?= ($t['group_status'] ?? 'pending') === 'completed' ? 'check' : (($t['group_status'] ?? 'pending') === 'in_progress' ? 'clock' : 'pause') ?>"></i>
+                    <?php foreach ($recentActivity as $activity): ?>
+                    <div class="timeline-item enhanced" data-activity="<?= $activity['activity_type'] ?>">
+                        <div class="timeline-marker activity-<?= str_replace('task_', '', $activity['activity_type']) ?>">
+                            <?php 
+                            $icon = 'plus';
+                            switch($activity['activity_type']) {
+                                case 'task_created': $icon = 'plus'; break;
+                                case 'task_updated': $icon = 'edit'; break;
+                                case 'task_completed': $icon = 'check'; break;
+                                default: $icon = 'clock';
+                            }
+                            ?>
+                            <i class="fas fa-<?= $icon ?>"></i>
                         </div>
-                        <div class="timeline-content">
-                            <div class="timeline-header">
-                                <h5><?= htmlspecialchars($t['title']) ?></h5>
-                                <span class="timeline-date"><?= (isset($t['start_date']) && $t['start_date']) ? date('M j', strtotime($t['start_date'])) : date('M j', strtotime($t['created_at'])) ?></span>
+                        <div class="timeline-content enhanced">
+                            <div class="activity-header">
+                                <div class="activity-main">
+                                    <h5 class="activity-title">
+                                        <a href="index.php?action=task_details&id=<?= $activity['task_id'] ?>" target="_blank">
+                                            <?= htmlspecialchars($activity['title']) ?>
+                                        </a>
+                                    </h5>
+                                    <span class="activity-type">
+                                        <?php 
+                                        switch($activity['activity_type']) {
+                                            case 'task_created': echo 'was assigned to you'; break;
+                                            case 'task_updated': echo 'was updated'; break;
+                                            case 'task_completed': echo 'was completed'; break;
+                                            default: echo 'activity occurred';
+                                        }
+                                        ?>
+                                    </span>
+                                </div>
+                                <div class="activity-meta">
+                                    <span class="activity-time"><?= date('M j, g:i A', strtotime($activity['activity_date'])) ?></span>
+                                    <?php if ($activity['creator_name']): ?>
+                                    <span class="activity-by">by <?= htmlspecialchars($activity['creator_name']) ?></span>
+                                    <?php endif; ?>
+                                </div>
                             </div>
-                            <div class="timeline-badges">
-                                <span class="status-badge status-<?= $t['group_status'] ?? 'pending' ?>" style="color: <?= $t['status_color'] ?? '#6366f1' ?>">
-                                    <?= htmlspecialchars($t['status_name'] ?? 'Unknown') ?>
+                            <div class="activity-badges">
+                                <span class="status-badge status-<?= $activity['group_status'] ?? 'pending' ?>" style="color: <?= $activity['status_color'] ?? '#6366f1' ?>">
+                                    <?= htmlspecialchars($activity['status_name'] ?? 'Unknown') ?>
                                 </span>
-                                <span class="priority-badge priority-<?= $t['priority'] ?>">
-                                    <?= ucfirst($t['priority']) ?>
+                                <span class="priority-badge priority-<?= $activity['priority'] ?>">
+                                    <?= ucfirst($activity['priority']) ?>
                                 </span>
                             </div>
                         </div>
@@ -333,6 +372,22 @@ function filterTasks() {
             task.style.display = 'none';
             task.style.visibility = 'hidden';
             task.style.opacity = '0';
+        }
+    });
+}
+
+function filterActivity() {
+    const filter = document.getElementById('activityFilter').value;
+    const activities = document.querySelectorAll('.timeline-item.enhanced');
+    
+    activities.forEach(activity => {
+        const activityType = activity.dataset.activity || '';
+        if (!filter || activityType === filter) {
+            activity.style.display = 'flex';
+            activity.style.opacity = '1';
+        } else {
+            activity.style.display = 'none';
+            activity.style.opacity = '0';
         }
     });
 }
