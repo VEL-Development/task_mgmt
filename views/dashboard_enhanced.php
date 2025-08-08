@@ -3,7 +3,12 @@ require_once 'models/TaskEnhanced.php';
 require_once 'models/TaskStatus.php';
 
 $task = new TaskEnhanced($db);
-$stmt = $task->readRecent();
+
+// Get filter parameters
+$status_filter = $_GET['status_filter'] ?? '';
+$priority_filter = $_GET['priority_filter'] ?? '';
+
+$stmt = $task->readRecentFiltered($status_filter, $priority_filter);
 $page_title = "Dashboard";
 
 // Get statistics
@@ -134,33 +139,38 @@ include 'includes/header.php';
 </div>
 
 <!-- Recent Tasks -->
-<div class="tasks-section">
+<div class="tasks-section" id="tasks-section">
     <div class="section-header">
         <h2><i class="fas fa-list"></i> Recent Tasks</h2>
         <div class="section-filters">
-            <select id="statusFilter" class="filter-select">
-                <option value="">All Status</option>
-                <?php foreach ($allStatuses as $status): ?>
-                    <option value="<?php echo $status['group_status']; ?>"><?php echo htmlspecialchars($status['name']); ?></option>
-                <?php endforeach; ?>
-            </select>
-            <select id="priorityFilter" class="filter-select">
-                <option value="">All Priority</option>
-                <option value="urgent">Urgent</option>
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-                <option value="low">Low</option>
-            </select>
+            <form method="GET" style="display: flex; gap: 10px;">
+                <input type="hidden" name="action" value="dashboard">
+                <select name="status_filter" class="filter-select" onchange="this.form.action='#tasks-section'; this.form.submit();">
+                    <option value="">All Status</option>
+                    <?php foreach ($allStatuses as $status): ?>
+                        <option value="<?php echo $status['id']; ?>" <?php echo $status_filter == $status['id'] ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($status['name']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <select name="priority_filter" class="filter-select" onchange="this.form.action='#tasks-section'; this.form.submit();">
+                    <option value="">All Priority</option>
+                    <option value="urgent" <?php echo $priority_filter == 'urgent' ? 'selected' : ''; ?>>Urgent</option>
+                    <option value="high" <?php echo $priority_filter == 'high' ? 'selected' : ''; ?>>High</option>
+                    <option value="medium" <?php echo $priority_filter == 'medium' ? 'selected' : ''; ?>>Medium</option>
+                    <option value="low" <?php echo $priority_filter == 'low' ? 'selected' : ''; ?>>Low</option>
+                </select>
+            </form>
         </div>
     </div>
     
     <div class="tasks-grid">
         <?php while ($row = $stmt->fetch(PDO::FETCH_ASSOC)): ?>
-        <div class="task-card-modern fade-in" data-status="<?php echo $row['status']; ?>" data-priority="<?php echo $row['priority']; ?>">
+        <div class="task-card-modern fade-in">
             <div class="task-card-header">
                 <div class="task-priority priority-<?php echo $row['priority']; ?>"></div>
-                <div class="task-status status-<?php echo $row['status']; ?>">
-                    <?php echo ucfirst(str_replace('_', ' ', $row['status'])); ?>
+                <div class="task-status status-<?php echo $row['group_status'] ?? 'pending'; ?>">
+                    <?php echo htmlspecialchars($row['status_name'] ?? 'Unknown'); ?>
                 </div>
             </div>
             

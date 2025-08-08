@@ -25,16 +25,20 @@ $where_conditions = [];
 $params = [];
 
 if ($status_filter) {
-    $where_conditions[] = "ts.group_status = ?";
+    $where_conditions[] = "t.status_id = ?";
     $params[] = $status_filter;
 }
 if ($priority_filter) {
     $where_conditions[] = "t.priority = ?";
     $params[] = $priority_filter;
 }
-if ($assigned_filter) {
-    $where_conditions[] = "t.assigned_to = ?";
-    $params[] = $assigned_filter;
+if ($assigned_filter !== '') {
+    if ($assigned_filter === '0') {
+        $where_conditions[] = "t.assigned_to IS NULL";
+    } else {
+        $where_conditions[] = "t.assigned_to = ?";
+        $params[] = $assigned_filter;
+    }
 }
 if ($search) {
     $where_conditions[] = "(t.title LIKE ? OR t.description LIKE ?)";
@@ -89,7 +93,7 @@ include 'includes/header.php';
                 <select name="status">
                     <option value="">All Status</option>
                     <?php foreach ($allStatuses as $status): ?>
-                        <option value="<?php echo $status['group_status']; ?>" <?php echo $status_filter == $status['group_status'] ? 'selected' : ''; ?>>
+                        <option value="<?php echo $status['id']; ?>" <?php echo $status_filter == $status['id'] ? 'selected' : ''; ?>>
                             <?php echo htmlspecialchars($status['name']); ?>
                         </option>
                     <?php endforeach; ?>

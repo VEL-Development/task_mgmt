@@ -390,5 +390,34 @@ class TaskEnhanced extends Task {
         $stmt->execute([$user_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
+    public function readRecentFiltered($status_filter = '', $priority_filter = '', $limit = 6) {
+        $where_conditions = [];
+        $params = [];
+        
+        if ($status_filter) {
+            $where_conditions[] = "t.status_id = ?";
+            $params[] = $status_filter;
+        }
+        if ($priority_filter) {
+            $where_conditions[] = "t.priority = ?";
+            $params[] = $priority_filter;
+        }
+        
+        $where_clause = $where_conditions ? "WHERE " . implode(" AND ", $where_conditions) : "";
+        
+        $query = "SELECT t.*, u1.full_name as assigned_name, u2.full_name as creator_name,
+                         ts.name as status_name, ts.color as status_color, ts.group_status
+                  FROM tasks t 
+                  LEFT JOIN users u1 ON t.assigned_to = u1.id 
+                  LEFT JOIN users u2 ON t.created_by = u2.id 
+                  LEFT JOIN task_statuses ts ON t.status_id = ts.id
+                  $where_clause
+                  ORDER BY t.created_at DESC 
+                  LIMIT " . (int)$limit;
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($params);
+        return $stmt;
+    }
 }
 ?>

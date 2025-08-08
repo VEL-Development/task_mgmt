@@ -48,10 +48,12 @@ class Task {
     }
 
     public function readRecent($limit = 6) {
-        $query = "SELECT t.*, u1.full_name as assigned_name, u2.full_name as creator_name 
+        $query = "SELECT t.*, u1.full_name as assigned_name, u2.full_name as creator_name,
+                         ts.name as status_name, ts.color as status_color, ts.group_status
                   FROM " . $this->table_name . " t 
                   LEFT JOIN users u1 ON t.assigned_to = u1.id 
                   LEFT JOIN users u2 ON t.created_by = u2.id 
+                  LEFT JOIN task_statuses ts ON t.status_id = ts.id
                   ORDER BY t.created_at DESC LIMIT " . (int)$limit;
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
