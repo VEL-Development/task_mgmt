@@ -299,7 +299,14 @@ include 'includes/header.php';
                     <div class="activity-text">
                         <strong><?php echo $log['user_name']; ?></strong> <?php echo $log['action']; ?> 
                         <?php if($log['field_name']): ?>
-                            <?php echo $log['field_name']; ?>
+                            <?php 
+                            switch($log['field_name']) {
+                                case 'status_id': echo 'status'; break;
+                                case 'priority': echo 'priority'; break;
+                                case 'title': echo 'title'; break;
+                                default: echo $log['field_name'];
+                            }
+                            ?>
                         <?php else: ?>
                             this task
                         <?php endif; ?>
