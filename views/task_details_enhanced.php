@@ -306,9 +306,29 @@ include 'includes/header.php';
                     </div>
                     <?php if($log['old_value'] && $log['new_value']): ?>
                     <div class="activity-change">
-                        <span class="old-value"><?php echo htmlspecialchars($log['old_value']); ?></span>
+                        <span class="old-value" <?php 
+                            if($log['field_name'] == 'status_id' && $log['old_status_color']) {
+                                echo 'style="background-color: ' . $log['old_status_color'] . '; color: white;"';
+                            }
+                        ?>><?php 
+                            if($log['field_name'] == 'status_id' && $log['old_status_name']) {
+                                echo htmlspecialchars($log['old_status_name']);
+                            } else {
+                                echo htmlspecialchars($log['old_value']);
+                            }
+                        ?></span>
                         <i class="fas fa-arrow-right"></i>
-                        <span class="new-value"><?php echo htmlspecialchars($log['new_value']); ?></span>
+                        <span class="new-value" <?php 
+                            if($log['field_name'] == 'status_id' && $log['new_status_color']) {
+                                echo 'style="background-color: ' . $log['new_status_color'] . '; color: white;"';
+                            }
+                        ?>><?php 
+                            if($log['field_name'] == 'status_id' && $log['new_status_name']) {
+                                echo htmlspecialchars($log['new_status_name']);
+                            } else {
+                                echo htmlspecialchars($log['new_value']);
+                            }
+                        ?></span>
                     </div>
                     <?php endif; ?>
                     <div class="activity-time"><?php echo date('M d, Y g:i A', strtotime($log['created_at'])); ?></div>

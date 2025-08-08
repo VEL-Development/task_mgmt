@@ -163,8 +163,13 @@ class TaskEnhanced extends Task {
     }
     
     public function getAuditLog($task_id) {
-        $query = "SELECT a.*, u.full_name as user_name FROM task_audit a 
+        $query = "SELECT a.*, u.full_name as user_name,
+                         ts1.name as old_status_name, ts1.color as old_status_color,
+                         ts2.name as new_status_name, ts2.color as new_status_color
+                  FROM task_audit a 
                   JOIN users u ON a.user_id = u.id 
+                  LEFT JOIN task_statuses ts1 ON a.field_name = 'status_id' AND a.old_value = ts1.id
+                  LEFT JOIN task_statuses ts2 ON a.field_name = 'status_id' AND a.new_value = ts2.id
                   WHERE a.task_id = ? ORDER BY a.created_at DESC LIMIT 50";
         $stmt = $this->conn->prepare($query);
         $stmt->execute([$task_id]);
