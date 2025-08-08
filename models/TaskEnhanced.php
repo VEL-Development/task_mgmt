@@ -419,5 +419,49 @@ class TaskEnhanced extends Task {
         $stmt->execute($params);
         return $stmt;
     }
+    
+    public function getWeeklyProductivity() {
+        $query = "SELECT 
+                    DATE(t.created_at) as date,
+                    COUNT(*) as created_count,
+                    SUM(CASE WHEN ts.group_status = 'completed' THEN 1 ELSE 0 END) as completed_count
+                  FROM tasks t
+                  LEFT JOIN task_statuses ts ON t.status_id = ts.id
+                  WHERE t.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                  GROUP BY DATE(t.created_at)
+                  ORDER BY DATE(t.created_at)";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    public function getMonthlyWorkload() {
+        $query = "SELECT 
+                    WEEK(t.created_at) as week_num,
+                    COUNT(*) as task_count
+                  FROM tasks t
+                  WHERE t.created_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
+                  GROUP BY WEEK(t.created_at)
+                  ORDER BY WEEK(t.created_at)
+                  LIMIT 4";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    public function getPerformanceMetrics() {
+        $query = "SELECT 
+                    ROUND(AVG(CASE WHEN ts.group_status = 'completed' THEN 100 ELSE 70 END), 0) as quality,
+                    ROUND(AVG(CASE WHEN t.due_date IS NOT NULL AND ts.group_status = 'completed' AND t.updated_at <= t.due_date THEN 95 ELSE 75 END), 0) as speed,
+                    ROUND(AVG(CASE WHEN DATEDIFF(COALESCE(t.updated_at, NOW()), t.created_at) <= 7 THEN 90 ELSE 65 END), 0) as efficiency,
+                    ROUND(AVG(CASE WHEN t.description IS NOT NULL AND LENGTH(t.description) > 10 THEN 95 ELSE 80 END), 0) as accuracy,
+                    ROUND(AVG(CASE WHEN t.assigned_to IS NOT NULL THEN 90 ELSE 60 END), 0) as teamwork
+                  FROM tasks t
+                  LEFT JOIN task_statuses ts ON t.status_id = ts.id
+                  WHERE t.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }
 ?>
