@@ -169,7 +169,10 @@ include 'includes/header.php';
                     </div>
                     <div class="task-meta">
                         <span><i class="fas fa-user"></i> <?php echo $taskItem['assigned_name'] ?: 'Unassigned'; ?></span>
-                        <span><i class="fas fa-calendar"></i> <?php echo date('M j, Y', strtotime($taskItem['created_at'])); ?></span>
+                        <?php if (isset($taskItem['start_date']) && $taskItem['start_date']): ?>
+                        <span><i class="fas fa-play"></i> Start: <?php echo date('M j, Y', strtotime($taskItem['start_date'])); ?></span>
+                        <?php endif; ?>
+                        <span><i class="fas fa-calendar"></i> Created: <?php echo date('M j, Y', strtotime($taskItem['created_at'])); ?></span>
                         <?php if ($taskItem['due_date']): ?>
                         <span class="<?php echo strtotime($taskItem['due_date']) < strtotime('today') ? 'overdue' : ''; ?>">
                             <i class="fas fa-clock"></i> Due: <?php echo date('M j, Y', strtotime($taskItem['due_date'])); ?>

@@ -186,6 +186,12 @@ $completionRate = $userTasks['total'] > 0 ? round(($userTasks['completed'] / $us
                             <p class="task-description"><?= htmlspecialchars(substr($t['description'], 0, 100)) ?>...</p>
                             
                             <div class="task-meta">
+                                <?php if (isset($t['start_date']) && $t['start_date']): ?>
+                                <div class="meta-item">
+                                    <i class="fas fa-play"></i>
+                                    Start: <?= date('M j, Y', strtotime($t['start_date'])) ?>
+                                </div>
+                                <?php endif; ?>
                                 <div class="meta-item">
                                     <i class="fas fa-calendar"></i>
                                     Created: <?= date('M j, Y', strtotime($t['created_at'])) ?>
@@ -234,7 +240,7 @@ $completionRate = $userTasks['total'] > 0 ? round(($userTasks['completed'] / $us
                         <div class="timeline-content">
                             <div class="timeline-header">
                                 <h5><?= htmlspecialchars($t['title']) ?></h5>
-                                <span class="timeline-date"><?= date('M j', strtotime($t['created_at'])) ?></span>
+                                <span class="timeline-date"><?= (isset($t['start_date']) && $t['start_date']) ? date('M j', strtotime($t['start_date'])) : date('M j', strtotime($t['created_at'])) ?></span>
                             </div>
                             <div class="timeline-badges">
                                 <span class="status-badge status-<?= $t['group_status'] ?? 'pending' ?>" style="color: <?= $t['status_color'] ?? '#6366f1' ?>">

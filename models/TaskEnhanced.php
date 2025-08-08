@@ -334,7 +334,7 @@ class TaskEnhanced extends Task {
     }
     
     public function getUserRecentTasks($user_id, $limit = 5) {
-        $query = "SELECT t.id, t.title, t.priority, t.created_at,
+        $query = "SELECT t.id, t.title, t.priority, t.created_at, t.start_date,
                          ts.name as status_name,
                          ts.color as status_color,
                          ts.group_status
