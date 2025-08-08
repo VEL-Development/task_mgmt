@@ -83,16 +83,17 @@ include 'includes/header.php';
                         <i class="fas fa-cogs"></i> Status & Priority
                     </div>
                     
-                    <div class="">
+                    <div class="form-row-modern">
                         <div class="form-group-modern">
                             <label for="status" class="form-label-modern">
                                 <i class="fas fa-flag"></i> Status
                             </label>
-                            <div class="status-selector">
+                            <div class="status-selector-compact">
                                 <?php foreach ($allStatuses as $status): ?>
                                 <input type="radio" id="status_<?php echo $status['id']; ?>" name="status_id" value="<?php echo $status['id']; ?>" <?php echo $taskData['status_id'] == $status['id'] ? 'checked' : ''; ?>>
-                                <label for="status_<?php echo $status['id']; ?>" class="status-option <?php echo $status['group_status']; ?>" style="border-color: <?php echo $status['color']; ?>">
-                                    <i class="fas fa-circle" style="color: <?php echo $status['color']; ?>"></i> <?php echo htmlspecialchars($status['name']); ?>
+                                <label for="status_<?php echo $status['id']; ?>" class="status-option-compact" style="border-color: <?php echo $status['color']; ?>">
+                                    <i class="fas fa-circle" style="color: <?php echo $status['color']; ?>"></i>
+                                    <?php echo htmlspecialchars($status['name']); ?>
                                 </label>
                                 <?php endforeach; ?>
                             </div>
@@ -102,18 +103,18 @@ include 'includes/header.php';
                             <label for="priority" class="form-label-modern">
                                 <i class="fas fa-exclamation-triangle"></i> Priority
                             </label>
-                            <div class="priority-selector">
+                            <div class="priority-selector-compact">
                                 <input type="radio" id="low" name="priority" value="low" <?php echo $taskData['priority'] == 'low' ? 'checked' : ''; ?>>
-                                <label for="low" class="priority-option low">Low</label>
+                                <label for="low" class="priority-option-compact low">Low</label>
                                 
                                 <input type="radio" id="medium" name="priority" value="medium" <?php echo $taskData['priority'] == 'medium' ? 'checked' : ''; ?>>
-                                <label for="medium" class="priority-option medium">Medium</label>
+                                <label for="medium" class="priority-option-compact medium">Medium</label>
                                 
                                 <input type="radio" id="high" name="priority" value="high" <?php echo $taskData['priority'] == 'high' ? 'checked' : ''; ?>>
-                                <label for="high" class="priority-option high">High</label>
+                                <label for="high" class="priority-option-compact high">High</label>
                                 
                                 <input type="radio" id="urgent" name="priority" value="urgent" <?php echo $taskData['priority'] == 'urgent' ? 'checked' : ''; ?>>
-                                <label for="urgent" class="priority-option urgent">Urgent</label>
+                                <label for="urgent" class="priority-option-compact urgent">Urgent</label>
                             </div>
                         </div>
                     </div>
@@ -123,16 +124,30 @@ include 'includes/header.php';
                             <label for="start_date" class="form-label-modern">
                                 <i class="fas fa-play"></i> Start Date
                             </label>
-                            <input type="date" id="start_date" name="start_date" class="form-input-modern" 
-                                   value="<?php echo $taskData['start_date']; ?>">
+                            <div class="date-input-wrapper">
+                                <input type="date" id="start_date" name="start_date" class="form-input-modern" 
+                                       value="<?php echo $taskData['start_date']; ?>">
+                                <label class="date-checkbox">
+                                    <input type="checkbox" id="start_today" onchange="setTodayDate('start_date')">
+                                    <span class="checkmark"></span>
+                                    <span class="checkbox-text">Today</span>
+                                </label>
+                            </div>
                         </div>
                         
                         <div class="form-group-modern">
                             <label for="due_date" class="form-label-modern">
                                 <i class="fas fa-calendar-alt"></i> Due Date
                             </label>
-                            <input type="date" id="due_date" name="due_date" class="form-input-modern"
-                                   value="<?php echo $taskData['due_date']; ?>">
+                            <div class="date-input-wrapper">
+                                <input type="date" id="due_date" name="due_date" class="form-input-modern"
+                                       value="<?php echo $taskData['due_date']; ?>">
+                                <label class="date-checkbox">
+                                    <input type="checkbox" id="due_today" onchange="setTodayDate('due_date')">
+                                    <span class="checkmark"></span>
+                                    <span class="checkbox-text">Today</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -146,25 +161,37 @@ include 'includes/header.php';
                         <label for="assigned_to" class="form-label-modern">
                             <i class="fas fa-user"></i> Assign To
                         </label>
-                        <div class="user-selector">
+                        <div class="user-selector-enhanced">
                             <div class="user-option">
                                 <input type="radio" id="unassigned" name="assigned_to" value="" <?php echo empty($taskData['assigned_to']) ? 'checked' : ''; ?>>
-                                <label for="unassigned" class="user-card">
-                                    <div class="user-avatar unassigned">?</div>
-                                    <div class="user-info">
+                                <label for="unassigned" class="user-card-enhanced">
+                                    <div class="user-avatar-enhanced unassigned">
+                                        <i class="fas fa-user-slash"></i>
+                                    </div>
+                                    <div class="user-details">
                                         <div class="user-name">Unassigned</div>
-                                        <div class="user-role">No assignee</div>
+                                        <div class="user-role">No assignee selected</div>
+                                        <div class="user-status">Available for assignment</div>
+                                    </div>
+                                    <div class="selection-indicator">
+                                        <i class="fas fa-check-circle"></i>
                                     </div>
                                 </label>
                             </div>
                             <?php while ($row = $users->fetch(PDO::FETCH_ASSOC)): ?>
                             <div class="user-option">
                                 <input type="radio" id="user_<?php echo $row['id']; ?>" name="assigned_to" value="<?php echo $row['id']; ?>" <?php echo $taskData['assigned_to'] == $row['id'] ? 'checked' : ''; ?>>
-                                <label for="user_<?php echo $row['id']; ?>" class="user-card">
-                                    <div class="user-avatar"><?php echo strtoupper(substr($row['full_name'], 0, 1)); ?></div>
-                                    <div class="user-info">
+                                <label for="user_<?php echo $row['id']; ?>" class="user-card-enhanced">
+                                    <div class="user-avatar-enhanced">
+                                        <?php echo strtoupper(substr($row['full_name'], 0, 1)); ?>
+                                    </div>
+                                    <div class="user-details">
                                         <div class="user-name"><?php echo htmlspecialchars($row['full_name']); ?></div>
-                                        <div class="user-role">Team Member</div>
+                                        <div class="user-role"><?php echo ucfirst($row['role'] ?? 'member'); ?></div>
+                                        <div class="user-status">Available</div>
+                                    </div>
+                                    <div class="selection-indicator">
+                                        <i class="fas fa-check-circle"></i>
                                     </div>
                                 </label>
                             </div>
@@ -394,6 +421,21 @@ document.getElementById('due_date').addEventListener('change', function() {
         this.focus();
     }
 });
+
+// Smart date handling function
+function setTodayDate(inputId) {
+    const checkbox = event.target;
+    const dateInput = document.getElementById(inputId);
+    const today = new Date().toISOString().split('T')[0];
+    
+    if (checkbox.checked) {
+        dateInput.value = today;
+        dateInput.style.borderColor = '#10b981';
+    } else {
+        dateInput.value = '';
+        dateInput.style.borderColor = '';
+    }
+}
 </script>
 
 <?php include 'includes/footer.php'; ?>
