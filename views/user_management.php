@@ -156,6 +156,13 @@ $users = $user->getAllUsers();
                                 <div class="stat-label">Cancelled</div>
                             </div>
                         </div>
+                        <div class="stat-item overdue">
+                            <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                            <div class="stat-data">
+                                <div class="stat-number"><?= isset($userTasks['overdue']) ? $userTasks['overdue'] : 0 ?></div>
+                                <div class="stat-label">Overdue</div>
+                            </div>
+                        </div>
                     </div>
                     
                     <?php if ($userTasks['total'] > 0): ?>

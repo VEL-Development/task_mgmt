@@ -171,7 +171,7 @@ include 'includes/header.php';
                         <span><i class="fas fa-user"></i> <?php echo $taskItem['assigned_name'] ?: 'Unassigned'; ?></span>
                         <span><i class="fas fa-calendar"></i> <?php echo date('M j, Y', strtotime($taskItem['created_at'])); ?></span>
                         <?php if ($taskItem['due_date']): ?>
-                        <span class="<?php echo strtotime($taskItem['due_date']) < time() ? 'overdue' : ''; ?>">
+                        <span class="<?php echo strtotime($taskItem['due_date']) < strtotime('today') ? 'overdue' : ''; ?>">
                             <i class="fas fa-clock"></i> Due: <?php echo date('M j, Y', strtotime($taskItem['due_date'])); ?>
                         </span>
                         <?php endif; ?>

@@ -186,7 +186,7 @@ include 'includes/header.php';
                         <span><?php echo $row['assigned_name'] ?: 'Unassigned'; ?></span>
                     </div>
                     <?php if($row['due_date']): ?>
-                    <div class="info-item <?php echo strtotime($row['due_date']) < time() ? 'overdue' : ''; ?>">
+                    <div class="info-item <?php echo strtotime($row['due_date']) < strtotime('today') ? 'overdue' : ''; ?>">
                         <i class="fas fa-calendar"></i>
                         <span><?php echo date('M d', strtotime($row['due_date'])); ?></span>
                     </div>

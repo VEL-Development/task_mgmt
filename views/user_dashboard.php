@@ -191,7 +191,7 @@ $completionRate = $userTasks['total'] > 0 ? round(($userTasks['completed'] / $us
                                     Created: <?= date('M j, Y', strtotime($t['created_at'])) ?>
                                 </div>
                                 <?php if ($t['due_date']): ?>
-                                <div class="meta-item <?= strtotime($t['due_date']) < time() && ($t['group_status'] ?? 'pending') !== 'completed' ? 'overdue' : '' ?>">
+                                <div class="meta-item <?= strtotime($t['due_date']) < strtotime('today') && ($t['group_status'] ?? 'pending') !== 'completed' ? 'overdue' : '' ?>">
                                     <i class="fas fa-clock"></i>
                                     Due: <?= date('M j, Y', strtotime($t['due_date'])) ?>
                                 </div>
@@ -318,12 +318,15 @@ function filterTasks() {
     const tasks = document.querySelectorAll('.task-item');
     
     tasks.forEach(task => {
-        const status = task.dataset.status;
+        const status = task.dataset.status || 'pending';
         if (!filter || status === filter) {
             task.style.display = 'flex';
-            task.style.animation = 'fadeIn 0.3s ease';
+            task.style.visibility = 'visible';
+            task.style.opacity = '1';
         } else {
             task.style.display = 'none';
+            task.style.visibility = 'hidden';
+            task.style.opacity = '0';
         }
     });
 }
@@ -407,6 +410,12 @@ document.addEventListener('DOMContentLoaded', function() {
     cards.forEach((card, index) => {
         card.style.animationDelay = `${index * 0.1}s`;
         card.classList.add('fade-in');
+    });
+    
+    // Ensure all tasks are visible initially
+    const tasks = document.querySelectorAll('.task-item');
+    tasks.forEach(task => {
+        task.style.display = 'flex';
     });
 });
 </script>

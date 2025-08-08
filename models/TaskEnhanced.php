@@ -300,7 +300,8 @@ class TaskEnhanced extends Task {
             'pending' => 0,
             'in_progress' => 0,
             'completed' => 0,
-            'cancelled' => 0
+            'cancelled' => 0,
+            'overdue' => 0
         ];
         
         $query = "SELECT ts.group_status, COUNT(*) as count 
@@ -316,6 +317,18 @@ class TaskEnhanced extends Task {
                 $stats['total'] += $row['count'];
             }
         }
+        
+        // Get overdue count
+        $overdueQuery = "SELECT COUNT(*) as overdue_count 
+                        FROM tasks t 
+                        LEFT JOIN task_statuses ts ON t.status_id = ts.id 
+                        WHERE t.assigned_to = ? 
+                        AND DATE(t.due_date) < CURDATE() 
+                        AND ts.group_status NOT IN ('completed', 'cancelled')";
+        $overdueStmt = $this->conn->prepare($overdueQuery);
+        $overdueStmt->execute([$user_id]);
+        $overdueResult = $overdueStmt->fetch(PDO::FETCH_ASSOC);
+        $stats['overdue'] = $overdueResult['overdue_count'] ?? 0;
         
         return $stats;
     }

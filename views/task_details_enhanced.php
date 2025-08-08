@@ -173,13 +173,13 @@ include 'includes/header.php';
                     </div>
                     <?php endif; ?>
                     <?php if($taskData['due_date']): ?>
-                    <div class="timeline-item <?php echo strtotime($taskData['due_date']) < time() ? 'overdue' : ''; ?>">
+                    <div class="timeline-item <?php echo strtotime($taskData['due_date']) < strtotime('today') ? 'overdue' : ''; ?>">
                         <div class="timeline-dot due"></div>
                         <div class="timeline-content">
                             <div class="timeline-label">Due Date</div>
                             <div class="timeline-value">
                                 <?php echo date('M d, Y', strtotime($taskData['due_date'])); ?>
-                                <?php if(strtotime($taskData['due_date']) < time()): ?>
+                                <?php if(strtotime($taskData['due_date']) < strtotime('today')): ?>
                                     <span class="overdue-text">Overdue</span>
                                 <?php endif; ?>
                             </div>
