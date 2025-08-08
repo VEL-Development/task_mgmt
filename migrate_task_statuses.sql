@@ -25,3 +25,4 @@ ALTER TABLE tasks ADD FOREIGN KEY (status_id) REFERENCES task_statuses(id);
 
 -- Update existing tasks to use new status system
 UPDATE tasks SET status_id = (SELECT id FROM task_statuses WHERE group_status = tasks.status LIMIT 1);
+UPDATE tasks SET status_id = 1 WHERE status_id IS NULL;

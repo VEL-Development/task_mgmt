@@ -52,9 +52,8 @@ class Task {
                   FROM " . $this->table_name . " t 
                   LEFT JOIN users u1 ON t.assigned_to = u1.id 
                   LEFT JOIN users u2 ON t.created_by = u2.id 
-                  ORDER BY t.created_at DESC LIMIT :limit";
+                  ORDER BY t.created_at DESC LIMIT " . (int)$limit;
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt;
     }

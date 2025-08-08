@@ -1,10 +1,14 @@
 <?php
 require_once 'models/TaskEnhanced.php';
 require_once 'models/User.php';
+require_once 'models/TaskStatus.php';
 
 $task = new TaskEnhanced($db);
 $user = new User($db);
 $users = $user->read();
+
+$statusModel = new TaskStatus($db);
+$allStatuses = $statusModel->getAllStatuses();
 
 // Get filter parameters
 $status_filter = $_GET['status'] ?? '';
@@ -21,7 +25,7 @@ $where_conditions = [];
 $params = [];
 
 if ($status_filter) {
-    $where_conditions[] = "t.status = ?";
+    $where_conditions[] = "ts.group_status = ?";
     $params[] = $status_filter;
 }
 if ($priority_filter) {
@@ -84,10 +88,11 @@ include 'includes/header.php';
                 <label><i class="fas fa-flag"></i> Status</label>
                 <select name="status">
                     <option value="">All Status</option>
-                    <option value="pending" <?php echo $status_filter == 'pending' ? 'selected' : ''; ?>>Pending</option>
-                    <option value="in_progress" <?php echo $status_filter == 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
-                    <option value="completed" <?php echo $status_filter == 'completed' ? 'selected' : ''; ?>>Completed</option>
-                    <option value="cancelled" <?php echo $status_filter == 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
+                    <?php foreach ($allStatuses as $status): ?>
+                        <option value="<?php echo $status['group_status']; ?>" <?php echo $status_filter == $status['group_status'] ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($status['name']); ?>
+                        </option>
+                    <?php endforeach; ?>
                 </select>
             </div>
             
@@ -169,8 +174,8 @@ include 'includes/header.php';
                     </div>
                 </div>
                 <div class="task-badges">
-                    <span class="status-badge status-<?php echo $taskItem['status']; ?>">
-                        <?php echo ucfirst(str_replace('_', ' ', $taskItem['status'])); ?>
+                    <span class="status-badge status-<?php echo $taskItem['group_status'] ?? 'pending'; ?>" style="color: <?php echo $taskItem['status_color'] ?? '#6366f1'; ?>">
+                        <?php echo htmlspecialchars($taskItem['status_name'] ?? 'Unknown'); ?>
                     </span>
                     <span class="priority-badge priority-<?php echo $taskItem['priority']; ?>">
                         <?php echo ucfirst($taskItem['priority']); ?>

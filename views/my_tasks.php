@@ -2,14 +2,19 @@
 $page_title = "My Tasks";
 include 'includes/header.php';
 require_once 'models/TaskEnhanced.php';
+require_once 'models/TaskStatus.php';
 
 $taskModel = new TaskEnhanced($db);
+$statusModel = new TaskStatus($db);
+$allStatuses = $statusModel->getAllStatuses();
 $user_id = $_SESSION['user_id'];
 
 // Get user's today tasks (start date <= today && due date >= today)
 $today = date('Y-m-d');
-$query = "SELECT t.*, u.username as assigned_to_name FROM tasks t 
+$query = "SELECT t.*, u.username as assigned_to_name, ts.name as status_name, ts.color as status_color, ts.group_status 
+          FROM tasks t 
           LEFT JOIN users u ON t.assigned_to = u.id 
+          LEFT JOIN task_statuses ts ON t.status_id = ts.id
           WHERE t.assigned_to = ? AND t.start_date <= ? AND t.due_date >= ?
           ORDER BY t.due_date ASC, t.priority DESC";
 $stmt = $db->prepare($query);
@@ -50,7 +55,7 @@ $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="overview-card pending">
             <div class="card-icon"><i class="fas fa-clock"></i></div>
             <div class="card-content">
-                <h3><?php echo count(array_filter($tasks, fn($t) => $t['status'] == 'pending')); ?></h3>
+                <h3><?php echo count(array_filter($tasks, fn($t) => $t['group_status'] == 'pending')); ?></h3>
                 <p>Pending</p>
                 <div class="card-trend">Need attention</div>
             </div>
@@ -58,7 +63,7 @@ $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="overview-card progress">
             <div class="card-icon"><i class="fas fa-spinner fa-spin"></i></div>
             <div class="card-content">
-                <h3><?php echo count(array_filter($tasks, fn($t) => $t['status'] == 'in_progress')); ?></h3>
+                <h3><?php echo count(array_filter($tasks, fn($t) => $t['group_status'] == 'in_progress')); ?></h3>
                 <p>In Progress</p>
                 <div class="card-trend">Active work</div>
             </div>
@@ -66,7 +71,7 @@ $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="overview-card completed">
             <div class="card-icon"><i class="fas fa-check-circle"></i></div>
             <div class="card-content">
-                <h3><?php echo count(array_filter($tasks, fn($t) => $t['status'] == 'completed')); ?></h3>
+                <h3><?php echo count(array_filter($tasks, fn($t) => $t['group_status'] == 'completed')); ?></h3>
                 <p>Completed</p>
                 <div class="card-trend">Well done!</div>
             </div>
@@ -108,7 +113,7 @@ $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php else: ?>
             <div class="tasks-grid">
                 <?php foreach ($tasks as $task): ?>
-                    <div class="task-card <?php echo $task['status']; ?>" data-priority="<?php echo $task['priority']; ?>">
+                    <div class="task-card <?php echo $task['group_status']; ?>" data-priority="<?php echo $task['priority']; ?>">
                         <div class="task-card-header">
                             <div class="task-priority priority-<?php echo $task['priority']; ?>">
                                 <?php 
@@ -116,8 +121,8 @@ $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 echo '<i class="fas fa-' . $priority_icons[$task['priority']] . '"></i>';
                                 ?>
                             </div>
-                            <div class="task-status status-<?php echo $task['status']; ?>">
-                                <?php echo ucfirst(str_replace('_', ' ', $task['status'])); ?>
+                            <div class="task-status status-<?php echo $task['group_status']; ?>" style="color: <?php echo $task['status_color']; ?>">
+                                <?php echo htmlspecialchars($task['status_name']); ?>
                             </div>
                         </div>
                         
@@ -142,7 +147,7 @@ $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <a href="index.php?action=task_details&id=<?php echo $task['id']; ?>" class="btn-card-action">
                                 <i class="fas fa-eye"></i> <span>View</span>
                             </a>
-                            <?php if ($task['status'] != 'completed'): ?>
+                            <?php if ($task['group_status'] != 'completed'): ?>
                                 <a href="index.php?action=edit_task&id=<?php echo $task['id']; ?>" class="btn-card-action">
                                     <i class="fas fa-edit"></i> <span>Edit</span>
                                 </a>

@@ -10,10 +10,14 @@ class TaskEnhanced extends Task {
     public function read() {
         $query = "SELECT t.*, 
                          u1.full_name as assigned_name,
-                         u2.full_name as creator_name
+                         u2.full_name as creator_name,
+                         ts.name as status_name,
+                         ts.color as status_color,
+                         ts.group_status
                   FROM tasks t 
                   LEFT JOIN users u1 ON t.assigned_to = u1.id 
                   LEFT JOIN users u2 ON t.created_by = u2.id 
+                  LEFT JOIN task_statuses ts ON t.status_id = ts.id
                   ORDER BY t.created_at DESC";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
@@ -23,10 +27,14 @@ class TaskEnhanced extends Task {
     public function getById($id) {
         $query = "SELECT t.*, 
                          u1.full_name as assigned_name,
-                         u2.full_name as creator_name
+                         u2.full_name as creator_name,
+                         ts.name as status_name,
+                         ts.color as status_color,
+                         ts.group_status
                   FROM tasks t 
                   LEFT JOIN users u1 ON t.assigned_to = u1.id 
                   LEFT JOIN users u2 ON t.created_by = u2.id 
+                  LEFT JOIN task_statuses ts ON t.status_id = ts.id
                   WHERE t.id = ?";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(1, $id);
@@ -47,13 +55,18 @@ class TaskEnhanced extends Task {
             'priority_urgent' => 0
         ];
         
-        // Status statistics
-        $query = "SELECT status, COUNT(*) as count FROM tasks GROUP BY status";
+        // Status statistics using group_status
+        $query = "SELECT ts.group_status, COUNT(*) as count 
+                  FROM tasks t 
+                  LEFT JOIN task_statuses ts ON t.status_id = ts.id 
+                  GROUP BY ts.group_status";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $stats[$row['status']] = $row['count'];
-            $stats['total'] += $row['count'];
+            if ($row['group_status']) {
+                $stats[$row['group_status']] = $row['count'];
+                $stats['total'] += $row['count'];
+            }
         }
         
         // Priority statistics
@@ -166,12 +179,12 @@ class TaskEnhanced extends Task {
     
     public function create() {
         try {
-            $query = "INSERT INTO tasks (title, description, status, priority, assigned_to, created_by, due_date, start_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $query = "INSERT INTO tasks (title, description, status_id, priority, assigned_to, created_by, due_date, start_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $this->conn->prepare($query);
             $result = $stmt->execute([
                 $this->title,
                 $this->description,
-                $this->status,
+                $this->status_id,
                 $this->priority,
                 $this->assigned_to,
                 $this->created_by,
@@ -198,12 +211,12 @@ class TaskEnhanced extends Task {
         try {
             $current = $this->getById($this->id);
             
-            $query = "UPDATE tasks SET title = ?, description = ?, status = ?, priority = ?, assigned_to = ?, due_date = ?, start_date = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+            $query = "UPDATE tasks SET title = ?, description = ?, status_id = ?, priority = ?, assigned_to = ?, due_date = ?, start_date = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
             $stmt = $this->conn->prepare($query);
             $result = $stmt->execute([
                 $this->title,
                 $this->description,
-                $this->status,
+                $this->status_id,
                 $this->priority,
                 $this->assigned_to,
                 $this->due_date,
@@ -214,7 +227,7 @@ class TaskEnhanced extends Task {
             if ($result && $current) {
                 $changes = [
                     'title' => [$current['title'], $this->title],
-                    'status' => [$current['status'], $this->status],
+                    'status_id' => [$current['status_id'], $this->status_id],
                     'priority' => [$current['priority'], $this->priority]
                 ];
                 
@@ -246,13 +259,19 @@ class TaskEnhanced extends Task {
         $offset = ($page - 1) * $per_page;
         $where_clause = $where_conditions ? "WHERE " . implode(" AND ", $where_conditions) : "";
         
-        $query = "SELECT t.*, u1.full_name as assigned_name, u2.full_name as creator_name
+        $query = "SELECT t.*, 
+                         u1.full_name as assigned_name, 
+                         u2.full_name as creator_name,
+                         ts.name as status_name,
+                         ts.color as status_color,
+                         ts.group_status
                   FROM tasks t 
                   LEFT JOIN users u1 ON t.assigned_to = u1.id 
                   LEFT JOIN users u2 ON t.created_by = u2.id 
+                  LEFT JOIN task_statuses ts ON t.status_id = ts.id
                   $where_clause
                   ORDER BY t.created_at DESC
-                  LIMIT $per_page OFFSET $offset";
+                  LIMIT " . (int)$per_page . " OFFSET " . (int)$offset . "";
         
         $stmt = $this->conn->prepare($query);
         $stmt->execute($params);
@@ -262,31 +281,113 @@ class TaskEnhanced extends Task {
     public function getTasksCount($where_conditions = [], $params = []) {
         $where_clause = $where_conditions ? "WHERE " . implode(" AND ", $where_conditions) : "";
         
-        $query = "SELECT COUNT(*) as total FROM tasks t $where_clause";
+        $query = "SELECT COUNT(*) as total FROM tasks t 
+                  LEFT JOIN task_statuses ts ON t.status_id = ts.id 
+                  $where_clause";
         $stmt = $this->conn->prepare($query);
         $stmt->execute($params);
         return $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     }
     
     public function getUserTaskStats($user_id) {
-        $stats = ['total' => 0, 'completed' => 0, 'pending' => 0, 'in_progress' => 0];
+        $stats = [
+            'total' => 0,
+            'pending' => 0,
+            'in_progress' => 0,
+            'completed' => 0,
+            'cancelled' => 0
+        ];
         
-        $query = "SELECT status, COUNT(*) as count FROM tasks WHERE assigned_to = ? GROUP BY status";
+        $query = "SELECT ts.group_status, COUNT(*) as count 
+                  FROM tasks t 
+                  LEFT JOIN task_statuses ts ON t.status_id = ts.id 
+                  WHERE t.assigned_to = ? 
+                  GROUP BY ts.group_status";
         $stmt = $this->conn->prepare($query);
         $stmt->execute([$user_id]);
-        
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $stats[$row['status']] = $row['count'];
-            $stats['total'] += $row['count'];
+            if ($row['group_status']) {
+                $stats[$row['group_status']] = $row['count'];
+                $stats['total'] += $row['count'];
+            }
         }
         
         return $stats;
     }
     
     public function getUserRecentTasks($user_id, $limit = 5) {
-        $query = "SELECT id, title, status, priority, created_at FROM tasks WHERE assigned_to = ? ORDER BY created_at DESC LIMIT ?";
+        $query = "SELECT t.id, t.title, t.priority, t.created_at,
+                         ts.name as status_name,
+                         ts.color as status_color,
+                         ts.group_status
+                  FROM tasks t 
+                  LEFT JOIN task_statuses ts ON t.status_id = ts.id
+                  WHERE t.assigned_to = ? 
+                  ORDER BY t.created_at DESC 
+                  LIMIT " . (int)$limit;
         $stmt = $this->conn->prepare($query);
-        $stmt->execute([$user_id, $limit]);
+        $stmt->execute([$user_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    public function getUserTasks($user_id, $limit = 5) {
+        $query = "SELECT t.*, 
+                         ts.name as status_name,
+                         ts.color as status_color,
+                         ts.group_status
+                  FROM tasks t 
+                  LEFT JOIN task_statuses ts ON t.status_id = ts.id
+                  WHERE t.assigned_to = ? 
+                  ORDER BY t.created_at DESC 
+                  LIMIT " . (int)$limit;
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$user_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    public function getTodayTasks($user_id) {
+        $query = "SELECT t.*, 
+                         ts.name as status_name,
+                         ts.color as status_color,
+                         ts.group_status
+                  FROM tasks t 
+                  LEFT JOIN task_statuses ts ON t.status_id = ts.id
+                  WHERE t.assigned_to = ? 
+                  AND (DATE(t.start_date) = CURDATE() OR DATE(t.due_date) = CURDATE())
+                  ORDER BY t.priority DESC, t.due_date ASC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$user_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    public function getAllStatuses() {
+        $query = "SELECT * FROM task_statuses ORDER BY id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    public function getStatusesForCreation() {
+        $query = "SELECT * FROM task_statuses WHERE group_status IN ('pending', 'in_progress', 'completed') ORDER BY id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    public function getAllUserTasks($user_id, $limit = 50) {
+        $query = "SELECT t.*, 
+                         ts.name as status_name, 
+                         ts.color as status_color, 
+                         ts.group_status, 
+                         u.full_name as creator_name
+                  FROM tasks t 
+                  LEFT JOIN task_statuses ts ON t.status_id = ts.id
+                  LEFT JOIN users u ON t.created_by = u.id
+                  WHERE t.assigned_to = ?
+                  ORDER BY t.created_at DESC 
+                  LIMIT " . (int)$limit;
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$user_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

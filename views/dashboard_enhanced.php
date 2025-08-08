@@ -1,5 +1,6 @@
 <?php
 require_once 'models/TaskEnhanced.php';
+require_once 'models/TaskStatus.php';
 
 $task = new TaskEnhanced($db);
 $stmt = $task->readRecent();
@@ -8,6 +9,9 @@ $page_title = "Dashboard";
 // Get statistics
 $stats = $task->getStatistics();
 $chartData = $task->getChartData();
+
+$statusModel = new TaskStatus($db);
+$allStatuses = $statusModel->getAllStatuses();
 
 include 'includes/header.php';
 ?>
@@ -136,10 +140,9 @@ include 'includes/header.php';
         <div class="section-filters">
             <select id="statusFilter" class="filter-select">
                 <option value="">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
+                <?php foreach ($allStatuses as $status): ?>
+                    <option value="<?php echo $status['group_status']; ?>"><?php echo htmlspecialchars($status['name']); ?></option>
+                <?php endforeach; ?>
             </select>
             <select id="priorityFilter" class="filter-select">
                 <option value="">All Priority</option>

@@ -20,8 +20,7 @@ $task = new TaskEnhanced($db);
 $userData = $user->getUserById($userId);
 $userTasks = $task->getUserTaskStats($userId);
 $recentTasks = $task->getUserRecentTasks($userId, 10);
-$allUserTasks = $task->getTasksWithPagination(['t.assigned_to = ?'], [$userId], 1, 50);
-
+$allUserTasks = $task->getAllUserTasks($userId, 50);
 $completionRate = $userTasks['total'] > 0 ? round(($userTasks['completed'] / $userTasks['total']) * 100) : 0;
 ?>
 
@@ -165,7 +164,7 @@ $completionRate = $userTasks['total'] > 0 ? round(($userTasks['completed'] / $us
                     </div>
                     <?php else: ?>
                     <?php foreach ($allUserTasks as $t): ?>
-                    <div class="task-item" data-status="<?= $t['status'] ?>">
+                    <div class="task-item" data-status="<?= $t['group_status'] ?? 'pending' ?>">
                         <div class="task-priority priority-<?= $t['priority'] ?>"></div>
                         <div class="task-content">
                             <div class="task-header">
@@ -175,8 +174,8 @@ $completionRate = $userTasks['total'] > 0 ? round(($userTasks['completed'] / $us
                                     </a>
                                 </h4>
                                 <div class="task-badges">
-                                    <span class="status-badge status-<?= $t['status'] ?>">
-                                        <?= ucfirst(str_replace('_', ' ', $t['status'])) ?>
+                                    <span class="status-badge status-<?= $t['group_status'] ?? 'pending' ?>" style="color: <?= $t['status_color'] ?? '#6366f1' ?>">
+                                        <?= htmlspecialchars($t['status_name'] ?? 'Unknown') ?>
                                     </span>
                                     <span class="priority-badge priority-<?= $t['priority'] ?>">
                                         <?= ucfirst($t['priority']) ?>
@@ -192,7 +191,7 @@ $completionRate = $userTasks['total'] > 0 ? round(($userTasks['completed'] / $us
                                     Created: <?= date('M j, Y', strtotime($t['created_at'])) ?>
                                 </div>
                                 <?php if ($t['due_date']): ?>
-                                <div class="meta-item <?= strtotime($t['due_date']) < time() && $t['status'] !== 'completed' ? 'overdue' : '' ?>">
+                                <div class="meta-item <?= strtotime($t['due_date']) < time() && ($t['group_status'] ?? 'pending') !== 'completed' ? 'overdue' : '' ?>">
                                     <i class="fas fa-clock"></i>
                                     Due: <?= date('M j, Y', strtotime($t['due_date'])) ?>
                                 </div>
@@ -229,8 +228,8 @@ $completionRate = $userTasks['total'] > 0 ? round(($userTasks['completed'] / $us
                     <?php else: ?>
                     <?php foreach ($recentTasks as $t): ?>
                     <div class="timeline-item">
-                        <div class="timeline-marker status-<?= $t['status'] ?>">
-                            <i class="fas fa-<?= $t['status'] === 'completed' ? 'check' : ($t['status'] === 'in_progress' ? 'clock' : 'pause') ?>"></i>
+                        <div class="timeline-marker status-<?= $t['group_status'] ?? 'pending' ?>">
+                            <i class="fas fa-<?= ($t['group_status'] ?? 'pending') === 'completed' ? 'check' : (($t['group_status'] ?? 'pending') === 'in_progress' ? 'clock' : 'pause') ?>"></i>
                         </div>
                         <div class="timeline-content">
                             <div class="timeline-header">
@@ -238,8 +237,8 @@ $completionRate = $userTasks['total'] > 0 ? round(($userTasks['completed'] / $us
                                 <span class="timeline-date"><?= date('M j', strtotime($t['created_at'])) ?></span>
                             </div>
                             <div class="timeline-badges">
-                                <span class="status-badge status-<?= $t['status'] ?>">
-                                    <?= ucfirst(str_replace('_', ' ', $t['status'])) ?>
+                                <span class="status-badge status-<?= $t['group_status'] ?? 'pending' ?>" style="color: <?= $t['status_color'] ?? '#6366f1' ?>">
+                                    <?= htmlspecialchars($t['status_name'] ?? 'Unknown') ?>
                                 </span>
                                 <span class="priority-badge priority-<?= $t['priority'] ?>">
                                     <?= ucfirst($t['priority']) ?>

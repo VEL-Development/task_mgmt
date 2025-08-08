@@ -1,5 +1,6 @@
 <?php
 require_once 'models/TaskEnhanced.php';
+require_once 'models/TaskStatus.php';
 
 if (!isset($_GET['id'])) {
     header('Location: index.php');
@@ -11,6 +12,9 @@ $taskData = $task->getById($_GET['id']);
 $attachments = $task->getAttachments($_GET['id']);
 $notes = $task->getNotes($_GET['id']);
 $auditLog = $task->getAuditLog($_GET['id']);
+
+$statusModel = new TaskStatus($db);
+$currentStatus = $statusModel->getStatusById($taskData['status_id']);
 
 if (!$taskData) {
     header('Location: index.php?error=Task not found');
@@ -43,12 +47,12 @@ include 'includes/header.php';
 
 <div class="task-overview-cards">
     <div class="overview-card status-card">
-        <div class="card-icon status-<?php echo $taskData['status']; ?>">
-            <i class="fas fa-<?php echo $taskData['status'] == 'completed' ? 'check-circle' : ($taskData['status'] == 'in_progress' ? 'spinner fa-spin' : 'clock'); ?>"></i>
+        <div class="card-icon status-<?php echo $currentStatus['group_status']; ?>" style="background-color: <?php echo $currentStatus['color']; ?>">
+            <i class="fas fa-circle"></i>
         </div>
         <div class="card-content">
             <div class="card-label">Status</div>
-            <div class="card-value"><?php echo ucfirst(str_replace('_', ' ', $taskData['status'])); ?></div>
+            <div class="card-value"><?php echo htmlspecialchars($currentStatus['name']); ?></div>
         </div>
     </div>
     
@@ -81,7 +85,7 @@ include 'includes/header.php';
             <div class="card-value">
                 <?php 
                 $progress = 0;
-                switch($taskData['status']) {
+                switch($currentStatus['group_status']) {
                     case 'pending': $progress = 0; break;
                     case 'in_progress': $progress = 50; break;
                     case 'completed': $progress = 100; break;
@@ -111,7 +115,7 @@ include 'includes/header.php';
             <div class="card-body">
                 <?php 
                 $progress = 0;
-                switch($taskData['status']) {
+                switch($currentStatus['group_status']) {
                     case 'pending': $progress = 0; break;
                     case 'in_progress': $progress = 50; break;
                     case 'completed': $progress = 100; break;
