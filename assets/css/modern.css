@@ -5186,3 +5186,12 @@ body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f8
         justify-content: center;
     }
 }
+/* Fix Z-Index for Dropdowns */
+.select-dropdown {
+    z-index: 9999 !important;
+}
+
+.filters-section {
+    position: relative;
+    z-index: 100;
+}

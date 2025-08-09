@@ -79,7 +79,7 @@ include 'includes/header.php';
         <a href="index.php?action=create_task" class="btn-modern btn-primary">
             <i class="fas fa-plus"></i> New Task
         </a>
-        <a href="index.php?action=export_csv&status=<?php echo $status_filter; ?>&priority=<?php echo $priority_filter; ?>&assigned=<?php echo $assigned_filter; ?>&search=<?php echo urlencode($search); ?>&start_date=<?php echo $start_date_filter; ?>&due_date=<?php echo $due_date_filter; ?>" class="btn-modern btn-outline">
+        <a href="#" onclick="exportWithFilters()" class="btn-modern btn-outline">
             <i class="fas fa-download"></i> Export CSV
         </a>
         <a href="index.php" class="btn-modern btn-secondary">
@@ -384,6 +384,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 100);
 });
+
+function exportWithFilters() {
+    const form = document.getElementById('filtersForm');
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+    
+    for (let [key, value] of formData.entries()) {
+        if (key !== 'action') {
+            params.append(key, value);
+        }
+    }
+    
+    window.location.href = 'index.php?action=export_csv&' + params.toString();
+}
 
 function deleteTask(taskId) {
     Swal.fire({
