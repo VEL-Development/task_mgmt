@@ -11,9 +11,9 @@ $statusModel = new TaskStatus($db);
 $allStatuses = $statusModel->getAllStatuses();
 
 // Get filter parameters
-$status_filter = $_GET['status'] ?? '';
-$priority_filter = $_GET['priority'] ?? '';
-$assigned_filter = $_GET['assigned'] ?? '';
+$status_filter = isset($_GET['status']) ? implode(',', (array)$_GET['status']) : '';
+$priority_filter = isset($_GET['priority']) ? implode(',', (array)$_GET['priority']) : '';
+$assigned_filter = isset($_GET['assigned']) ? implode(',', (array)$_GET['assigned']) : '';
 $search = $_GET['search'] ?? '';
 $start_date_filter = $_GET['start_date'] ?? '';
 $due_date_filter = $_GET['due_date'] ?? '';
@@ -25,19 +25,30 @@ $where_conditions = [];
 $params = [];
 
 if ($status_filter) {
-    $where_conditions[] = "t.status_id = ?";
-    $params[] = $status_filter;
+    $status_ids = explode(',', $status_filter);
+    $placeholders = str_repeat('?,', count($status_ids) - 1) . '?';
+    $where_conditions[] = "t.status_id IN ($placeholders)";
+    $params = array_merge($params, $status_ids);
 }
 if ($priority_filter) {
-    $where_conditions[] = "t.priority = ?";
-    $params[] = $priority_filter;
+    $priorities = explode(',', $priority_filter);
+    $placeholders = str_repeat('?,', count($priorities) - 1) . '?';
+    $where_conditions[] = "t.priority IN ($placeholders)";
+    $params = array_merge($params, $priorities);
 }
 if ($assigned_filter !== '') {
-    if ($assigned_filter === '0') {
-        $where_conditions[] = "t.assigned_to IS NULL";
-    } else {
-        $where_conditions[] = "t.assigned_to = ?";
-        $params[] = $assigned_filter;
+    $assigned_ids = explode(',', $assigned_filter);
+    $assigned_conditions = [];
+    foreach ($assigned_ids as $assigned_id) {
+        if ($assigned_id === '0') {
+            $assigned_conditions[] = "t.assigned_to IS NULL";
+        } else {
+            $assigned_conditions[] = "t.assigned_to = ?";
+            $params[] = $assigned_id;
+        }
+    }
+    if (!empty($assigned_conditions)) {
+        $where_conditions[] = "(" . implode(" OR ", $assigned_conditions) . ")";
     }
 }
 if ($search) {
@@ -78,72 +89,124 @@ include 'includes/header.php';
 </div>
 
 <div class="tasks-container">
-    <!-- Filters -->
+    <!-- Advanced Filters -->
     <div class="filters-section">
-        <form method="GET" class="filters-form">
+        <form method="GET" class="filters-form" id="filtersForm">
             <input type="hidden" name="action" value="tasks_list">
             
-            <div class="filter-group">
-                <label><i class="fas fa-search"></i> Search</label>
-                <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search tasks...">
+            <div class="filters-row" style="width: 100%;">
+                <div class="filter-item">
+                    <label>Search</label>
+                    <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search tasks..." class="filter-input">
+                </div>
+                
+                <div class="filter-item">
+                    <label>Status</label>
+                    <div class="select-wrapper">
+                        <div class="select-display" onclick="toggleDropdown('status')">
+                            <span id="status-display">All Status</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="select-dropdown" id="status-dropdown">
+                            <?php foreach ($allStatuses as $status): ?>
+                            <label class="option-item">
+                                <input type="checkbox" name="status[]" value="<?php echo $status['id']; ?>" 
+                                       <?php echo in_array($status['id'], explode(',', $status_filter)) ? 'checked' : ''; ?>
+                                       onchange="updateDisplay('status')">
+                                <span class="option-text" style="color: <?php echo $status['color']; ?>">
+                                    <i class="fas fa-circle"></i> <?php echo htmlspecialchars($status['name']); ?>
+                                </span>
+                            </label>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="filter-item">
+                    <label>Priority</label>
+                    <div class="select-wrapper">
+                        <div class="select-display" onclick="toggleDropdown('priority')">
+                            <span id="priority-display">All Priority</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="select-dropdown" id="priority-dropdown">
+                            <label class="option-item">
+                                <input type="checkbox" name="priority[]" value="low" 
+                                       <?php echo in_array('low', explode(',', $priority_filter)) ? 'checked' : ''; ?>
+                                       onchange="updateDisplay('priority')">
+                                <span class="option-text priority-low">Low</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="checkbox" name="priority[]" value="medium" 
+                                       <?php echo in_array('medium', explode(',', $priority_filter)) ? 'checked' : ''; ?>
+                                       onchange="updateDisplay('priority')">
+                                <span class="option-text priority-medium">Medium</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="checkbox" name="priority[]" value="high" 
+                                       <?php echo in_array('high', explode(',', $priority_filter)) ? 'checked' : ''; ?>
+                                       onchange="updateDisplay('priority')">
+                                <span class="option-text priority-high">High</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="checkbox" name="priority[]" value="urgent" 
+                                       <?php echo in_array('urgent', explode(',', $priority_filter)) ? 'checked' : ''; ?>
+                                       onchange="updateDisplay('priority')">
+                                <span class="option-text priority-urgent">Urgent</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
             </div>
             
-            <div class="filter-group">
-                <label><i class="fas fa-flag"></i> Status</label>
-                <select name="status">
-                    <option value="">All Status</option>
-                    <?php foreach ($allStatuses as $status): ?>
-                        <option value="<?php echo $status['id']; ?>" <?php echo $status_filter == $status['id'] ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($status['name']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            
-            <div class="filter-group">
-                <label><i class="fas fa-exclamation-triangle"></i> Priority</label>
-                <select name="priority">
-                    <option value="">All Priority</option>
-                    <option value="low" <?php echo $priority_filter == 'low' ? 'selected' : ''; ?>>Low</option>
-                    <option value="medium" <?php echo $priority_filter == 'medium' ? 'selected' : ''; ?>>Medium</option>
-                    <option value="high" <?php echo $priority_filter == 'high' ? 'selected' : ''; ?>>High</option>
-                    <option value="urgent" <?php echo $priority_filter == 'urgent' ? 'selected' : ''; ?>>Urgent</option>
-                </select>
-            </div>
-            
-            <div class="filter-group">
-                <label><i class="fas fa-user"></i> Assigned To</label>
-                <select name="assigned">
-                    <option value="">All Users</option>
-                    <option value="0" <?php echo $assigned_filter === '0' ? 'selected' : ''; ?>>Unassigned</option>
-                    <?php 
-                    $users->execute();
-                    while ($u = $users->fetch(PDO::FETCH_ASSOC)): 
-                    ?>
-                    <option value="<?php echo $u['id']; ?>" <?php echo $assigned_filter == $u['id'] ? 'selected' : ''; ?>>
-                        <?php echo htmlspecialchars($u['full_name']); ?>
-                    </option>
-                    <?php endwhile; ?>
-                </select>
-            </div>
-            
-            <div class="filter-group">
-                <label><i class="fas fa-calendar-plus"></i> Start Date From</label>
-                <input type="date" name="start_date" value="<?php echo htmlspecialchars($start_date_filter); ?>">
-            </div>
-            
-            <div class="filter-group">
-                <label><i class="fas fa-calendar-times"></i> Due Date Until</label>
-                <input type="date" name="due_date" value="<?php echo htmlspecialchars($due_date_filter); ?>">
-            </div>
-            
-            <div class="filter-actions">
-                <button type="submit" class="btn-filter">
-                    <i class="fas fa-filter"></i>
-                </button>
-                <a href="index.php?action=tasks_list" class="btn-filter btn-clear">
-                    <i class="fas fa-times"></i>
-                </a>
+            <div class="filters-row" style="width: 100%;">         
+                <div class="filter-item">
+                    <label>Assigned To</label>
+                    <div class="select-wrapper">
+                        <div class="select-display" onclick="toggleDropdown('assigned')">
+                            <span id="assigned-display">All Users</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="select-dropdown" id="assigned-dropdown">
+                            <label class="option-item">
+                                <input type="checkbox" name="assigned[]" value="0" 
+                                       <?php echo in_array('0', explode(',', $assigned_filter)) ? 'checked' : ''; ?>
+                                       onchange="updateDisplay('assigned')">
+                                <span class="option-text">Unassigned</span>
+                            </label>
+                            <?php 
+                            $users->execute();
+                            while ($u = $users->fetch(PDO::FETCH_ASSOC)): 
+                            ?>
+                            <label class="option-item">
+                                <input type="checkbox" name="assigned[]" value="<?php echo $u['id']; ?>" 
+                                       <?php echo in_array($u['id'], explode(',', $assigned_filter)) ? 'checked' : ''; ?>
+                                       onchange="updateDisplay('assigned')">
+                                <span class="option-text"><?php echo htmlspecialchars($u['full_name']); ?></span>
+                            </label>
+                            <?php endwhile; ?>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="filter-item">
+                    <label>Start Date From</label>
+                    <input type="date" name="start_date" value="<?php echo htmlspecialchars($start_date_filter); ?>" class="filter-input">
+                </div>
+                
+                <div class="filter-item">
+                    <label>Due Date Until</label>
+                    <input type="date" name="due_date" value="<?php echo htmlspecialchars($due_date_filter); ?>" class="filter-input">
+                </div>
+                
+                <div class="filter-actions">
+                    <button type="submit" class="btn-apply">
+                        <i class="fas fa-search"></i> Apply
+                    </button>
+                    <button type="button" class="btn-clear" onclick="clearAllFilters()">
+                        <i class="fas fa-times"></i> Clear
+                    </button>
+                </div>
             </div>
         </form>
     </div>
@@ -241,6 +304,87 @@ include 'includes/header.php';
 </div>
 
 <script>
+
+
+function toggleDropdown(type) {
+    try {
+        const dropdown = document.getElementById(type + '-dropdown');
+        if (!dropdown) return;
+        
+        const allDropdowns = document.querySelectorAll('.select-dropdown');
+        
+        allDropdowns.forEach(d => {
+            if (d && d !== dropdown) {
+                d.classList.remove('show');
+            }
+        });
+        
+        dropdown.classList.toggle('show');
+    } catch (error) {
+        console.warn('Dropdown toggle error:', error);
+    }
+}
+
+function updateDisplay(type) {
+    try {
+        const checkboxes = document.querySelectorAll(`input[name="${type}[]"]`);
+        const display = document.getElementById(type + '-display');
+        
+        if (!display || !checkboxes || !checkboxes.length) return;
+        
+        const checked = Array.from(checkboxes).filter(cb => cb && cb.checked);
+        
+        if (checked.length === 0) {
+            display.textContent = type === 'status' ? 'All Status' : 
+                                 type === 'priority' ? 'All Priority' : 'All Users';
+            display.className = 'placeholder';
+        } else if (checked.length === 1) {
+            const textElement = checked[0].nextElementSibling;
+            display.textContent = textElement ? textElement.textContent.trim() : `1 selected`;
+            display.className = 'selected';
+        } else {
+            display.textContent = `${checked.length} selected`;
+            display.className = 'selected multiple';
+        }
+    } catch (error) {
+        console.warn('Display update error:', error);
+    }
+}
+
+function clearAllFilters() {
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+    document.querySelectorAll('input[type="text"], input[type="date"]').forEach(input => input.value = '');
+    updateDisplay('status');
+    updateDisplay('priority');
+    updateDisplay('assigned');
+    // Auto-submit after clearing
+    document.getElementById('filtersForm').submit();
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.select-wrapper')) {
+        document.querySelectorAll('.select-dropdown').forEach(d => d.classList.remove('show'));
+    }
+});
+
+// Initialize displays on page load
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        try {
+            const statusDisplay = document.getElementById('status-display');
+            const priorityDisplay = document.getElementById('priority-display');
+            const assignedDisplay = document.getElementById('assigned-display');
+            
+            if (statusDisplay) updateDisplay('status');
+            if (priorityDisplay) updateDisplay('priority');
+            if (assignedDisplay) updateDisplay('assigned');
+        } catch (error) {
+            // Silently handle errors
+        }
+    }, 100);
+});
+
 function deleteTask(taskId) {
     Swal.fire({
         title: 'Delete Task?',

@@ -13,6 +13,15 @@
     <link href="assets/css/user_dashboard_page.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Prevent MutationObserver errors from external scripts
+        window.addEventListener('error', function(e) {
+            if (e.message && e.message.includes('MutationObserver')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    </script>
 </head>
 <body>
     <?php if(isset($_SESSION['user_id'])): ?>
