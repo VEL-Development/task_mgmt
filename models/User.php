@@ -108,7 +108,7 @@ class User {
     }
     
     public function read() {
-        $query = "SELECT id, username, full_name FROM " . $this->table_name . " ORDER BY full_name";
+        $query = "SELECT id, username, full_name, role  FROM " . $this->table_name . " ORDER BY full_name";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt;

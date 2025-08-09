@@ -83,70 +83,104 @@ include 'includes/header.php';
                         <i class="fas fa-cogs"></i> Status & Priority
                     </div>
                     
-                    <div class="form-row-modern">
-                        <div class="form-group-modern">
-                            <label for="status" class="form-label-modern">
-                                <i class="fas fa-flag"></i> Status
-                            </label>
-                            <div class="status-selector-compact">
-                                <?php foreach ($allStatuses as $status): ?>
-                                <input type="radio" id="status_<?php echo $status['id']; ?>" name="status_id" value="<?php echo $status['id']; ?>" <?php echo $taskData['status_id'] == $status['id'] ? 'checked' : ''; ?>>
-                                <label for="status_<?php echo $status['id']; ?>" class="status-option-compact" style="border-color: <?php echo $status['color']; ?>">
-                                    <i class="fas fa-circle" style="color: <?php echo $status['color']; ?>"></i>
-                                    <?php echo htmlspecialchars($status['name']); ?>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group-modern">
+                                <label for="status" class="form-label-modern">
+                                    <i class="fas fa-flag"></i> Status
                                 </label>
-                                <?php endforeach; ?>
+                                <div class="status-priority-selector">
+                                    <?php foreach ($allStatuses as $status): ?>
+                                    <div class="selector-option">
+                                        <div class="selector-label status-option <?php echo $taskData['status_id'] == $status['id'] ? 'active' : ''; ?>" data-status-id="<?php echo $status['id']; ?>" data-color="<?php echo $status['color']; ?>">
+                                            <div class="selector-icon">
+                                                <i class="fas fa-circle" style="color: <?php echo $status['color']; ?>"></i>
+                                            </div>
+                                            <span class="selector-text"><?php echo htmlspecialchars($status['name']); ?></span>
+                                        </div>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <input type="hidden" id="status_id" name="status_id" value="<?php echo $taskData['status_id']; ?>">
                             </div>
                         </div>
                         
-                        <div class="form-group-modern">
-                            <label for="priority" class="form-label-modern">
-                                <i class="fas fa-exclamation-triangle"></i> Priority
-                            </label>
-                            <div class="priority-selector-compact">
-                                <input type="radio" id="low" name="priority" value="low" <?php echo $taskData['priority'] == 'low' ? 'checked' : ''; ?>>
-                                <label for="low" class="priority-option-compact low">Low</label>
-                                
-                                <input type="radio" id="medium" name="priority" value="medium" <?php echo $taskData['priority'] == 'medium' ? 'checked' : ''; ?>>
-                                <label for="medium" class="priority-option-compact medium">Medium</label>
-                                
-                                <input type="radio" id="high" name="priority" value="high" <?php echo $taskData['priority'] == 'high' ? 'checked' : ''; ?>>
-                                <label for="high" class="priority-option-compact high">High</label>
-                                
-                                <input type="radio" id="urgent" name="priority" value="urgent" <?php echo $taskData['priority'] == 'urgent' ? 'checked' : ''; ?>>
-                                <label for="urgent" class="priority-option-compact urgent">Urgent</label>
+                        <div class="col-md-6">
+                            <div class="form-group-modern">
+                                <label for="priority" class="form-label-modern">
+                                    <i class="fas fa-exclamation-triangle"></i> Priority
+                                </label>
+                                <div class="status-priority-selector">
+                                    <div class="selector-option">
+                                        <div class="selector-label priority-option priority-low <?php echo $taskData['priority'] == 'low' ? 'active' : ''; ?>" data-priority="low">
+                                            <div class="selector-icon">
+                                                <i class="fas fa-arrow-down"></i>
+                                            </div>
+                                            <span class="selector-text">Low</span>
+                                        </div>
+                                    </div>
+                                    <div class="selector-option">
+                                        <div class="selector-label priority-option priority-medium <?php echo $taskData['priority'] == 'medium' ? 'active' : ''; ?>" data-priority="medium">
+                                            <div class="selector-icon">
+                                                <i class="fas fa-minus"></i>
+                                            </div>
+                                            <span class="selector-text">Medium</span>
+                                        </div>
+                                    </div>
+                                    <div class="selector-option">
+                                        <div class="selector-label priority-option priority-high <?php echo $taskData['priority'] == 'high' ? 'active' : ''; ?>" data-priority="high">
+                                            <div class="selector-icon">
+                                                <i class="fas fa-arrow-up"></i>
+                                            </div>
+                                            <span class="selector-text">High</span>
+                                        </div>
+                                    </div>
+                                    <div class="selector-option">
+                                        <div class="selector-label priority-option priority-urgent <?php echo $taskData['priority'] == 'urgent' ? 'active' : ''; ?>" data-priority="urgent">
+                                            <div class="selector-icon">
+                                                <i class="fas fa-exclamation"></i>
+                                            </div>
+                                            <span class="selector-text">Urgent</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="priority" name="priority" value="<?php echo $taskData['priority']; ?>">
                             </div>
                         </div>
                     </div>
                     
-                    <div class="form-row-modern">
-                        <div class="form-group-modern">
-                            <label for="start_date" class="form-label-modern">
-                                <i class="fas fa-play"></i> Start Date
-                            </label>
-                            <div class="date-input-wrapper">
-                                <input type="date" id="start_date" name="start_date" class="form-input-modern" 
-                                       value="<?php echo $taskData['start_date']; ?>">
-                                <label class="date-checkbox">
-                                    <input type="checkbox" id="start_today" onchange="setTodayDate('start_date')">
-                                    <span class="checkmark"></span>
-                                    <span class="checkbox-text">Today</span>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-group-modern">
+                                <label for="start_date" class="form-label-modern">
+                                    <i class="fas fa-play"></i> Start Date
                                 </label>
+                                <div class="date-input-wrapper">
+                                    <input type="date" id="start_date" name="start_date" class="form-input-modern" 
+                                           value="<?php echo $taskData['start_date']; ?>">
+                                    <label class="date-checkbox">
+                                        <input type="checkbox" id="start_today" onchange="setTodayDate('start_date')">
+                                        <span class="checkmark"></span>
+                                        <span class="checkbox-text">Today</span>
+                                    </label>
+                                </div>
                             </div>
                         </div>
                         
-                        <div class="form-group-modern">
-                            <label for="due_date" class="form-label-modern">
-                                <i class="fas fa-calendar-alt"></i> Due Date
-                            </label>
-                            <div class="date-input-wrapper">
-                                <input type="date" id="due_date" name="due_date" class="form-input-modern"
-                                       value="<?php echo $taskData['due_date']; ?>">
-                                <label class="date-checkbox">
-                                    <input type="checkbox" id="due_today" onchange="setTodayDate('due_date')">
-                                    <span class="checkmark"></span>
-                                    <span class="checkbox-text">Today</span>
+                        <div class="col-md-6">
+                            <div class="form-group-modern">
+                                <label for="due_date" class="form-label-modern">
+                                    <i class="fas fa-calendar-alt"></i> Due Date
                                 </label>
+                                <div class="date-input-wrapper">
+                                    <input type="date" id="due_date" name="due_date" class="form-input-modern"
+                                           value="<?php echo $taskData['due_date']; ?>">
+                                    <label class="date-checkbox">
+                                        <input type="checkbox" id="due_today" onchange="setTodayDate('due_date')">
+                                        <span class="checkmark"></span>
+                                        <span class="checkbox-text">Today</span>
+                                    </label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -267,8 +301,27 @@ include 'includes/header.php';
 </div>
 
 <script>
-// File upload handling
+// Selector handling
 document.addEventListener('DOMContentLoaded', function() {
+    // Status selector
+    document.querySelectorAll('.status-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.status-option').forEach(opt => opt.classList.remove('active'));
+            this.classList.add('active');
+            document.getElementById('status_id').value = this.dataset.statusId;
+        });
+    });
+    
+    // Priority selector
+    document.querySelectorAll('.priority-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.priority-option').forEach(opt => opt.classList.remove('active'));
+            this.classList.add('active');
+            document.getElementById('priority').value = this.dataset.priority;
+        });
+    });
+    
+    // File upload handling
     const attachmentInput = document.getElementById('attachments');
     const fileList = document.getElementById('file-list');
     let selectedFiles = [];
